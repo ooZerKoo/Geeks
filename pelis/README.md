@@ -1,6 +1,6 @@
 # CONSUMIR DATOS DE API REST
 
-_Proyecto de GeekHubs para hacer búsquedas a través de una API REST_
+_Proyecto de GeeksHubs para hacer búsquedas a través de una API REST_
 
 ## Qué hace 📋
 
