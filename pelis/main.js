@@ -77,6 +77,7 @@ const getApiUrl = (type, v, id_lang = 1, page = 1) => new Promise((res, err) => 
     res(url)
 })
 
+// Función para desplazarnos por las páginas
 const goPage = (page, reload = true) => {
     if (document.querySelector('.page.active') !== null) {
         let active = document.querySelector('.page.active');
@@ -160,6 +161,7 @@ const showResult = (data) => {
     document.getElementById('pagination').innerHTML = getPagination(data.pages);
 }
 
+// empezamos las acciones de filtrado
 const beginAction = (action) => {
     if (action !== null) {
         goPage(1, false);
