@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="header">
+        <div class="container">
+            <input type="text" name="inputSearch" id="input-search" placeholder="Buscar">
+            <input type="button" value="Buscar" id="btn-search">
+        </div>
+    </div>
+
+    <div id="subheader">
+        <div class="container">
+            <span class="btn" id="btn-popular">Populares</span>
+            <span class="btn" id="btn-top_rated">TOP Rated</span>
+            <span class="btn" id="btn-upcoming">Próximamente</span>
+            <span class="btn" id="btn-now_playing">Reproduciendo Ahora</span>
+            <span class="btn" id="btn-latest">La Última</span>
+            <select class="btn" id="idLang">
+                <option value="1" selected>Español</option>
+                <option value="5">Català</option>
+                <option value="2">Inglés</option>
+                <option value="3">Portugués</option>
+                <option value="4">Alemán</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="result"></div>
+        <div id="pagination"></div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
