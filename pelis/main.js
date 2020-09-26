@@ -144,15 +144,14 @@ const renderResult = (data) => new Promise((res, err) => {
         html += getVotes(p.vote_average);
         html += '</li>';
     })
-    if (html != '') {
-        var html_data = {
-            'html' : html,
-            'pages' : data.total_pages,
-        }
-        res(html_data)
-    } else {
-        err(new Error('Error con el HTML'));
+    if (html == '') {
+        html += '<p class="alert">No ha habido resultados para la búsqueda</p>';
     }
+    var html_data = {
+        'html' : html,
+        'pages' : data.total_pages == 0 ? 1 : data.total_pages,
+    }
+    res(html_data)
 })
 
 // Mostramos el contenido html

@@ -24,7 +24,7 @@ html, body {
 }
 
 #subheader {
-    background: #a5fff2;
+    background:aquamarine;
     width: 100%;
     box-shadow: 0 0 20px -5px #1d1d1d;
     height: 100px;
@@ -36,6 +36,7 @@ html, body {
 
 #result {
     margin-top: 25px;
+    min-height: 50vh;
 }
 
 #result li {
@@ -188,5 +189,31 @@ h3 {
     cursor: pointer;
 }
 #pagination .page.active {
-    background: #04c4e4;
+    background:aquamarine;
+}
+
+#footer {
+    width: 100%;
+    text-align: center;
+    padding: 25px;
+    background: #1d1d1d;
+    float: left;
+    color: white;
+}
+#footer a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+p.alert {
+    width: 100%;
+    padding: 25px;
+    color: crimson;
+    font-size: 1.2eM;
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid;
+    float: left;
+    margin-top: 25px;
 }
