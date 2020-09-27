@@ -1,4 +1,4 @@
-# Geeks
+# GeeksHubs
 
 _Elementos usados durante el curso de GeeksHubs_
 
