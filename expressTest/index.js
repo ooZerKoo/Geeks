@@ -1,13 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const MovieRouter = require('./views/MovieRouter')
+const MovieRoute = require('./views/MovieRoute.js')
 
 const app = express();
 
-const args = process.argv.slice(2);
-const PORT = args[0];
-
 app.use(bodyParser.json())
-app.use('/', MovieRouter);
 
-app.listen(PORT, () => console.log(`Server ready on http://localhost:${PORT}`))
+app.use('/', MovieRoute);
+app.listen(3000, () => console.log('ok, http://localhost:3000'));
