@@ -1,0 +1,20 @@
+{
+  "name": "test",
+  "version": "1.2.3",
+  "description": "no se que hara",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ooZerKoo/Geeks/npm.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ooZerKoo/Geeks/npm/issues"
+  },
+  "homepage": "https://github.com/ooZerKoo/Geeks/npm#readme",
+  "dependencies": {}
+}
