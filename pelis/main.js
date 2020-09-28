@@ -46,10 +46,10 @@ const getCurrentPage = () => {
 */
 
 // URL API
-const getBaseUrl = () => {return 'https://api.themoviedb.org/3/'}
+const getBaseUrl = () => 'https://api.themoviedb.org/3/';
 
 // Ponemos la variable de la API
-const getApi = () => {return '?api_key=cea68b520beecac6718820e4ac576c3a'}
+const getApi = () => '?api_key=cea68b520beecac6718820e4ac576c3a';
 
 // Ponemos la variable del idioma
 const getLanguage = (id) => {
@@ -136,14 +136,15 @@ const getPeliculas = (data) => new Promise((res, err) => {
 const renderResult = (data) => new Promise((res, err) => {
     var html = '';
     data.results.forEach(p => {
-        html += '<li class="film">';
-        html += '<img src="'+getImage(p.poster_path)+'">';
-        html += '<h3>'+p.title+'</h3>';
-        html += '<div class="description">'
-        html += '<p>'+p.overview+'</p>';
-        html += '</div>'
-        html += getVotes(p.vote_average);
-        html += '</li>';
+        html += `
+            <li class="film">
+                <img src="${getImage(p.poster_path)}">
+                <h3>${p.title}</h3>
+                <div class="description">
+                    <p>${p.overview}</p>
+                </div>
+                ${getVotes(p.vote_average)}
+            </li>`;
     })
     if (html == '') {
         html += '<p class="alert">No ha habido resultados para la búsqueda</p>';
@@ -240,7 +241,7 @@ const getPagination = (total) => {
             if (i == page || total == 1) {
                 c = 'active';
             }
-            html += '<span onclick="goPage('+i+')" class="page '+c+'">'+i+'</span>';
+            html += addPageBtn(i, c);
         }
     } else {
         if (page < 5) {
@@ -249,34 +250,37 @@ const getPagination = (total) => {
                 if (i == page) {
                     c = 'active';
                 }
-                html += '<span onclick="goPage('+i+')" class="page '+c+'">'+i+'</span>';
+                html += addPageBtn(i, c);
             }
-            html += '<span class="page">...</span>';
-            html += '<span onclick="goPage('+total+')" class="page">'+total+'</span>';
+            html += addNoPageBtn()
+            html += addPageBtn(total);
         } else if((page + 3) >= total) {
-            html += '<span onclick="goPage(1)" class="page">1</span>';
-            html += '<span class="page">...</span>';
+            html += addPageBtn(1);
+            html += addNoPageBtn()
             for (let i = (total - 5); i <= total; i++) {
                 let c = '';
                 if (i == page) {
                     c = 'active';
                 }
-                html += '<span onclick="goPage('+i+')" class="page '+c+'">'+i+'</span>';
+                html += addPageBtn(i, c);
             }
         }else {
-            html += '<span onclick="goPage(1)" class="page">1</span>';
-            html += '<span class="page">...</span>';
+            html += addPageBtn(1)
+            html += addNoPageBtn()
             for (let i = (page - 2); i <= (page + 2); i++) {
                 let c = '';
                 if (i == page) {
                     c = 'active';
                 }
-                html += '<span onclick="goPage('+i+')" class="page '+c+'">'+i+'</span>';
+                html += addPageBtn(i, c)
             }
-            html += '<span class="page">...</span>';
-            html += '<span onclick="goPage('+total+')" class="page">'+total+'</span>';
+            html += addNoPageBtn();
+            html += addPageBtn(total);
 
         }
     }
     return html;
 }
+
+const addPageBtn = (i, c = null) => `<span onclick="goPage(${i})" class="page ${c}">${i}</span>`;
+const addNoPageBtn = () => '<span class="page">...</span>';
