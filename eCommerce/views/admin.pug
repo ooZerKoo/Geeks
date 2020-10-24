@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  if users
+    h1 Usuarios
+    each user in users
+      include listing/user.pug
+  if user
+    h1 Usuario
+    include listing/user_edit.pug
+    a(href='/user/logout') Cerrar Sesión

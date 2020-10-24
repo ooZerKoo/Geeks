@@ -1,0 +1,8 @@
+li.product
+  h3=product.name
+  h4=product.description
+
+  span.price=product.price+product.getSymbol
+  if product.discount > 0
+    span.price-discount=' -'+product.discount+(product.discountType == 'amount' ? product.getSymbol : '%')
+    span.price-final=product.finalPrice+product.getSymbol

@@ -1,0 +1,13 @@
+extends layout
+
+block content
+    if _title != ''
+        h1= _title
+
+block leftColumn
+    if _left_column !== null
+        #left_colum= _left_column
+
+block rightColumn
+    if _right_column !== null
+        #right_column= _right_column
