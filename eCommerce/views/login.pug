@@ -1,0 +1,23 @@
+extends layout
+
+block content
+    h1=title
+    if error
+        div.error=error
+    form(method='post')
+        if !register
+            input(type='text', name='login', placeholder='E-mail / Usuario', value=data ? data.user : '')
+            input(type='password', name='password')
+        else
+            input(type='text', name='user', placeholder='Usuario', value=data ? data.user : '')
+            input(type='text', name='email', placeholder='E-mail', value=data ? data.email : '')
+            input(type='date', name='birthday', value=data ? data.birthday : '')
+            input(type='password', name='password')
+            input(type='password', name='password2')
+        input(type='submit', value='Login')
+    
+    if admin !== true
+        if register
+            a(href='/login') Inicia Sesión
+        else
+            a(href='/login/new') Regístrate
