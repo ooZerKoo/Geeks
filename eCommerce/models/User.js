@@ -1,6 +1,7 @@
+const bcrypt = require('bcrypt')
+const saltRounds = process.env.SALT_ROUNDS
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
-const Password = require('../models/Password')
 
 const UserSchema = mongoose.Schema(
     {
@@ -85,7 +86,7 @@ UserSchema.statics.findByCredentials = async function(login, password) {
         if (!user) {
             return 'Usuario no encontrado'
         }
-        const check = await Password.checkPassword(password, user.password)
+        const check = await User.checkPassword(password, user.password)
         if (!check) {
             return 'Contraseña Incorrecta'
         }
@@ -212,6 +213,15 @@ UserSchema.statics.getLogged = async function (req) {
     }
 }
 
+UserSchema.methods.updatePswd = async function(password) {
+    const newPassword = await User.setPassword(password)
+    return await User.findByIdAndUpdate(
+        this._id,
+        {password: newPassword},
+        {new: true}
+    )
+}
+
 UserSchema.statics.redirectUserPanel = function (res) {
     res.redirect('/user/panel')
 }
@@ -254,6 +264,15 @@ UserSchema.methods.getUserPermissions = async function () {
         console.error(error)
     }
 }
+
+UserSchema.statics.setPassword = (password) => {
+    return bcrypt.hash(password, saltRounds)
+}
+
+UserSchema.statics.checkPassword = (password, passwordDB) => {
+    return bcrypt.compare(password, passwordDB)
+}
+
 
 const User = mongoose.model('User', UserSchema);
 

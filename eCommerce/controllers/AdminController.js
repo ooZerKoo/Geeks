@@ -1,4 +1,5 @@
 const User = require('../models/User')
+const Product = require('../models/Product')
 const UserController = require('../controllers/UserController')
 
 const AdminController = {
@@ -27,17 +28,61 @@ const AdminController = {
         }
     },
     // render del panel de usuario
-    async renderPanel(req, res, next, error = null, success = null){
+    async renderPanel(req, res){
         try {
-            const user = await User.getLogged(req)
-            const permissions = await user.getUserPermissions()
-            res.render('user', {
-                title: 'Panel de Usuario',
-                user: user,
-                error: error,
-                success: success,
-                permissions: {...permissions},
-            })
+            const adminVars = req.admin_vars
+            res.render('admin/home', {...adminVars})
+        } catch (error) {
+            console.error(error)
+        }
+    },
+
+    async renderOrders(req, res){
+        try {
+            const adminVars = req.admin_vars
+            res.render('admin/orders', {...adminVars, title: 'Pedidos'})
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    async renderProducts(req, res){
+        try {
+            const adminVars = req.admin_vars
+            res.render('admin/products', {...adminVars, title: 'Productos'})
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    async renderCategories(req, res){
+        try {
+            const adminVars = req.admin_vars
+            res.render('admin/categories', {...adminVars, title: 'Categorías'})
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    async renderCustomers(req, res){
+        try {
+            const adminVars = req.admin_vars
+            res.render('admin/categories', {...adminVars, title: 'Clientes'})
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    async renderMenus(req, res, next) {
+        try {
+            const url = process.env.ADMIN_ROUTE+'/panel/'
+            const adminVars = {
+                left_menu: [
+                    {name: 'Inicio', url: url},
+                    {name: 'Clientes', url: url+'customers'},
+                    {name: 'Pedidos', url: url+'orders'},
+                    {name: 'Categorías', url: url+'categories'},
+                    {name: 'Productos', url: url+'products'},
+                ],
+                title: 'Panel de Administrador'}
+            req.admin_vars = adminVars
+            next()
         } catch (error) {
             console.error(error)
         }

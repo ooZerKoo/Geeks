@@ -1,5 +1,4 @@
 const User = require('../models/User')
-const Password = require('../models/Password')
 
 const UserController = {
     // get /login
@@ -13,13 +12,13 @@ const UserController = {
             // si están vacíos mandamos error
             if (!password || !login) {
                 const error = 'Rellena los campos necesarios'
-                UserController.renderForm(req, res, null, {login: login, error: error})
+                UserController.renderForm(req, res, null, {user: login, error: error})
             } else {
                 // buscamos un ususario con esos datos
                 const user = await User.findByCredentials(login, password)
                 if (typeof user != 'object') {
                     // si no lo encuentra mandamo error
-                    UserController.renderForm(req, res, null, {login: login, error : user})
+                    UserController.renderForm(req, res, null, {user: login, error : user})
                 } else {
                     user.login(req, res)
                 }
@@ -42,20 +41,24 @@ const UserController = {
                 r = 'Debes rellenar los campos'
             } else if (!data.user) {
                 r = 'El nombre de usuario es necesario'
+            } else if (data.user.length < process.env.LOGIN_LEN) {
+                r = 'El nombre de usuario tienes que ser de ' + process.env.LOGIN_LEN + ' o más caracteres'
             } else if (!data.email) {
                 r = 'El e-mail es necesario'
             } else if(await User.isUserRegistred(data.user)){
                 r = 'El nombre de usuario ya está registrado'
             } else if (await User.isUserRegistred(data.email)) {
                 r = 'El e-mail ya está registrado'
+            } else if (data.password.length < process.env.PASSWD_LEN) {
+                r = 'La contraseña tiene que ser de ' + process.env.PASSWD_LEN + ' o más caracteres'
             } else if (data.password != data.password2) {
                 r = 'Las contraseñas no concuerdan'
             } else {
-                data.password = await Password.setPassword(data.password)
+                data.password = await User.setPassword(data.password)
                 // insertamos a la BBDD + creamos la sesión + redireccionamos a su panel de usuario
-                User.create(data)
-                    .then( user => user.generateAuthToken())
-                    .then( user => user.login(req, res))
+                const user = await User.create(data)
+                await user.generateAuthToken()
+                user.login(req, res)
             }
             let result = {error: r, register: true}
             UserController.renderForm(req, res, null, result)
@@ -85,12 +88,7 @@ const UserController = {
                     UserController.renderPanel(req, res, null, 'Las contraseñas no coinciden')
                 } else {
                     // encriptamos pasword y lo guardamos
-                    const newPassword = await Password.setPassword(data.password)
-                    await User.findByIdAndUpdate(
-                        user._id,
-                        {password: newPassword},
-                        {new: true}
-                    )
+                    await user.updatePaswd(data.password)
                     UserController.renderPanel(req, res, null, null, 'Contraseña actualizada')
                 }
             }
@@ -101,7 +99,7 @@ const UserController = {
     // render del formulario
     renderForm(req, res, next, data = null){
         const title = ((data && data.register) ? 'Regístrate' : 'Inicia Sesión')
-        res.render('login', {
+        res.render('pages/login', {
             title: title,
             data: data
         })
@@ -111,7 +109,7 @@ const UserController = {
         try {
             const user = await User.getLogged(req)
             const permissions = await user.getUserPermissions()
-            res.render('user', {
+            res.render('pages/user', {
                 title: 'Panel de Usuario',
                 user: user,
                 error: error,

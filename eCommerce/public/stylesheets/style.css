@@ -57,6 +57,7 @@ form input {
   font-weight: 400;
   font-family: Barlow;
   line-height: 1eM;
+  background: white;
 }
 
 .btn:hover {
@@ -165,7 +166,6 @@ form input {
 
 #permissions li:nth-child(2) {
   border-top: 1px dotted;
-  margin: ;
 }
 
 #permissions li span {

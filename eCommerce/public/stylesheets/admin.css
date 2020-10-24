@@ -1,0 +1,14 @@
+
+#admin {
+  display: grid;
+  grid-template-columns: 20% 80%;
+}
+
+#left_column {
+  background: #e0e0e0;
+	display: grid;
+  grid-template-rows: repeat(5, 60px);
+  align-items: center;
+  text-align: right;
+  padding: 15px;
+}

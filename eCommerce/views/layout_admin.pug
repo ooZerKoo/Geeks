@@ -1,0 +1,16 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='/stylesheets/admin.css')
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
+  body#admin
+    block nav
+    block leftColumn
+    .container
+      block content
+    block footer
+      #footer
+        a(href="https://www.urimarti.com", target='_blank') Web creada por urimarti
