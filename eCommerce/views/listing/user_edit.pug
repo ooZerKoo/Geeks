@@ -1,0 +1,18 @@
+div.user
+  h3=user.user
+  div.row
+    span= user.user
+  div.row
+    span= user.email
+  div.row
+    label(for='birthday') Aniversario
+    input(name='birthday', type='date', value=user.birthday)
+  div.row
+    form(method='POST')
+      if error
+        p.error=error
+      label(for='password') Cambiar Contraseña
+      input(name='password', type='password')
+      label(for='password2') Confirma la contraseña
+      input(name='password2', type='password')
+      input(type='submit' value='Actualizar')
