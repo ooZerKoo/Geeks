@@ -1,10 +1,18 @@
-const UserController = require('../controllers/UserController');
-const express = require('express');
-const router = express.Router();
+const UserController = require('../controllers/UserController')
+const User = require('../models/User')
+const express = require('express')
+const router = express.Router()
 
 /* GET users listing. */
-router.get('/', UserController.getUser);
-router.post('/', UserController.updatePassword);
-router.get('/logout', UserController.logout);
+router.get('/', User.isNotLoggedUser, UserController.renderLogin)
+router.post('/', User.isNotLoggedUser, UserController.setLogin)
 
-module.exports = router;
+router.get('/register', User.isNotLoggedUser, UserController.renderRegister)
+router.post('/register', User.isNotLoggedUser, UserController.setRegister)
+
+router.get('/panel', User.isLoggedUser, UserController.renderPanel)
+router.post('/panel', User.isLoggedUser, UserController.updatePassword)
+
+router.get('/logout', User.isLoggedUser, UserController.logout)
+
+module.exports = router
