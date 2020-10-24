@@ -39,21 +39,27 @@ const UserSchema = mongoose.Schema(
     }
 )
 
-UserSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({_id: this._id}, process.env.KEY)
-    return User.findOneAndUpdate(
-        { _id: this._id}, 
-        { $push: { tokens: token } },
-        {new: true}
-    );
+UserSchema.methods.generateAuthToken = async function () {
+    try {
+        const token = await jwt.sign({_id: this._id}, process.env.KEY)
+        const user = await this.updateOne(
+            { $push: { tokens: token } }
+        )
+        return user
+    } catch (error) {
+        console.error(error)
+    }
 }
 
-UserSchema.methods.removeAuthToken = function (token) {
-    return User.findOneAndUpdate(
-        { _id: this._id}, 
-        { $pull: { tokens: token } },
-        {new: true}
-    );
+UserSchema.methods.removeAuthToken = async function (token) {
+    try {
+        const user = await this.updateOne(
+            { $pull: { tokens: token } }
+        )
+        return user
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 UserSchema.statics.findByToken = async function(token) {
@@ -95,7 +101,7 @@ UserSchema.statics.isNotLoggedUser = async function(req, res, next) {
         if (!logged) {
             next()
         } else {
-            User.redirectUserPanel(res)
+            User.goPanel(req, res)
         }
     } catch (error) {
         console.error(error)
@@ -108,7 +114,33 @@ UserSchema.statics.isLoggedUser = async function(req, res, next) {
         if (logged) {
             next()
         } else {
-            User.redirectUserLogin(res)
+            User.goLogin(req, res)
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+UserSchema.statics.isNotLoggedAdmin = async function(req, res, next) {
+    try {
+        const logged = req.session.user
+        if (!logged || logged.role != 'admin') {
+            next()
+        } else {
+            User.goPanel(req, res)
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+UserSchema.statics.isLoggedAdmin = async function(req, res, next) {
+    try {
+        const logged = req.session.user
+        if (logged && logged.role == 'admin') {
+            next()
+        } else {
+            User.goLogin(req, res)
         }
     } catch (error) {
         console.error(error)
@@ -117,12 +149,42 @@ UserSchema.statics.isLoggedUser = async function(req, res, next) {
 
 UserSchema.methods.login = function(req, res) {
     req.session.user = this
-    User.redirectUserPanel(res)
+    User.goPanel(req, res)
+}
+
+UserSchema.statics.goLogin = function(req, res) {
+    const baseUrl = req.baseUrl.split('/')
+    switch ('/'+baseUrl[1]) {
+        case process.env.ADMIN_ROUTE:
+            User.redirectAdminLogin(res)
+            break
+        case process.env.USER_ROUTE:
+            User.redirectUserLogin(res)
+            break
+        default:
+            User.redirectUserLogin(res)
+            break
+    }
+}
+
+UserSchema.statics.goPanel = function(req, res) {
+    const baseUrl = req.baseUrl.split('/')
+    switch ('/'+baseUrl[1]) {
+        case process.env.ADMIN_ROUTE:
+            User.redirectAdminPanel(res)
+            break
+            case process.env.USER_ROUTE:
+            User.redirectUserPanel(res)
+            break
+        default:
+            User.redirectUserPanel(res)
+            break
+    }
 }
 
 UserSchema.statics.logout = function(req, res) {
     req.session.destroy()
-    User.redirectUserLogin(res)
+    User.goLogin(req, res)
 }
 
 UserSchema.statics.isUserRegistred = async function (login) {
@@ -135,6 +197,16 @@ UserSchema.statics.isUserRegistred = async function (login) {
         })
         return user ? true : false
         
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+UserSchema.statics.getLogged = async function (req) {
+    try {
+        const id = req.session.user._id
+        const user = await User.findById(id)
+        return user
     } catch (error) {
         
     }
@@ -154,6 +226,33 @@ UserSchema.statics.redirectAdminPanel = function (res) {
 
 UserSchema.statics.redirectAdminLogin = function (res) {
     res.redirect('/admin')
+}
+
+UserSchema.methods.getUserPermissions = async function () {
+    try {
+        switch (this.role) {
+            case 'customer':
+                const customer = {
+                    products: ['get'],
+                    invoices: ['get'],
+                }
+                return customer
+            case 'admin':
+                let admin = {
+                    products: ['get', 'post', 'put', 'delete'],
+                    invoices: ['get', 'post', 'put', 'delete']
+                }
+                return admin
+            default:
+                let def = {
+                    products: ['get'],
+                    invoices: ['get'],
+                }
+                return def
+        }
+    } catch (error) {
+        console.error(error)
+    }
 }
 
 const User = mongoose.model('User', UserSchema);

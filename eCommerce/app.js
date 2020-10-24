@@ -30,11 +30,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use('/', indexRouter);
-app.use('/user', usersRouter);
-app.use('/products', productsRouter);
-app.use('/admin', adminRouter);
+app.use(process.env.USER_ROUTE, usersRouter);
+app.use(process.env.PRODUCT_ROUTE, productsRouter);
+app.use(process.env.ADMIN_ROUTE, adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

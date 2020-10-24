@@ -11,8 +11,8 @@ router.get('/register', User.isNotLoggedUser, UserController.renderRegister)
 router.post('/register', User.isNotLoggedUser, UserController.setRegister)
 
 router.get('/panel', User.isLoggedUser, UserController.renderPanel)
-router.post('/panel', User.isLoggedUser, UserController.updatePassword)
+router.post('/panel', User.isLoggedUser, UserController.updateUser)
 
-router.get('/logout', User.isLoggedUser, UserController.logout)
+router.get('/logout', User.isLoggedUser, User.logout)
 
 module.exports = router

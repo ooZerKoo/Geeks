@@ -1,18 +1,43 @@
 div.user
-  h3=user.user
-  div.row
-    span= user.user
-  div.row
+  h2 Bienvenido, #{user.user}
+  .row
     span= user.email
-  div.row
-    label(for='birthday') Aniversario
-    input(name='birthday', type='date', value=user.birthday)
-  div.row
+  .row
+    h3 Modifica tus datos
     form(method='POST')
       if error
         p.error=error
-      label(for='password') Cambiar Contraseña
-      input(name='password', type='password')
-      label(for='password2') Confirma la contraseña
-      input(name='password2', type='password')
-      input(type='submit' value='Actualizar')
+      if success
+        p.success=success
+      .row
+        label(for='birthday') Aniversario
+        input(name='birthday', type='date', value=user.birthday)
+      .row
+        label(for='password') Cambiar Contraseña
+        input(name='password', type='password')
+      .row
+        label(for='password2') Confirma la contraseña
+        input(name='password2', type='password')
+      .row
+        input(type='submit', value='Actualizar', class='btn btn-primary')
+      .row
+        h3 Tokens para tu API
+      .row
+        if user.tokens.length > 0
+          .tokens
+            each token, id in user.tokens
+              input(type='text', class='token', value=token)
+              button(type='submit', value=id, class='btn btn-delete', name='deleteToken') X
+        else
+          p.error No tienes tokens creados
+      .row
+        button(type='submit', value='1', class='btn btn-primary', name='addToken') Añadir Token
+
+      #permissions.row
+        h3 Permisos en tu API
+        each perms, t in permissions
+          li=t
+            each p in perms
+              span.btn.float-right=p
+      .row
+        a(href='/user/logout', class='btn btn-secondary') Cerrar Sesión

@@ -1,13 +1,16 @@
-const AdminController = require('../controllers/AdminController')
 const express = require('express')
 const router = express.Router()
 
-router.get('/', AdminController.getPanel);
+const AdminController = require('../controllers/AdminController')
+const UserController = require('../controllers/UserController')
+const User = require('../models/User')
 
-router.get('/login', AdminController.getLogin);
-router.post('/login', AdminController.setLogin);
+router.get('/', User.isNotLoggedAdmin, UserController.renderLogin)
+router.post('/', User.isNotLoggedAdmin, AdminController.setLogin)
 
-router.get('/logout', AdminController.logout);
+router.get('/panel', User.isLoggedAdmin, AdminController.renderPanel)
+
+router.get('/logout', User.isLoggedAdmin, User.logout)
 
 
 module.exports = router
