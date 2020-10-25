@@ -2,5 +2,82 @@ extends ../layout_admin
 
 include ../admin/menu.pug
 
+mixin addForm(btn, formTitle, options = null)
+	div
+		if (options && options._id)
+			span.btn.toggleForm.float-right(data-id=options._id)=btn
+		else
+			span.btn.toggleForm.btn-secondary.float-right(data-id='new')=btn
+	form.adminForm(method='POST', data-id=options && options._id ? options._id : 'new')
+		if options && options._id
+			input(type='hidden', value=options._id, name='id')
+		.row
+			h3=formTitle
+		.row
+			.half
+				label Nombre
+				input(type='text', name='name', value=options && options.name ? options.name : '')
+			.half
+				label Enlace Amigable
+				input(type='text', name='url', value=options && options.url ? options.url : '')
+		.row
+			label Descripción
+			input(type='text', name='description', value=options && options.description ? options.description : '')
+		.row
+			.half
+				label Precio
+				input(type='number', name='price', step="0.01", value=options && options.price ? options.price : '')
+			.half
+				label Moneda
+				input(type='text', name='symbol', value=options && options.symbol ? options.symbol : '€')
+		.row
+			.half
+				label Descuento
+				input(type='number', name='discount', step="0.01", value=options && options.discount ? options.discount : '')
+			.half
+				label Tipo de Descuento
+				select(name='discountType')
+					option(value='percent', selected=(options && options.discountType == 'percent' ? true : false)) Porcentage %
+					option(value='amount', selected=(options && options.discountType == 'amount' ? true : false)) Cantidad €
+		.row
+			.half
+				label Cantidad
+				input(type='number', name='quantity', step="1", value=options && options.discount ? options.discount : '')
+			.half
+				label Categoría
+				select(name='category')
+					if (categories)
+						each category in categories
+							option(value=category._id, selected=(options && options.category == category._id ? true : false))=category.name
+
+		.row
+			input(type='submit', value=btn, class='btn btn-secondary')
+			if (options)
+				button(class='btn btn-delete float-right', type='submit', name='deleteForm', value=options._id) Eliminar
+
+mixin addList(data)
+	.list(data-id=data._id)
+		span= data.name
+		span= data.finalPrice + data.getSymbol
+		+addForm('Editar', 'Editar Producto', data)
+
 block content
-  h1=title
+	h1=title
+	if error
+		p.error=error
+	if success
+		p.success=success
+	.row
+		+addForm('Añadir', 'Añadir Nuevo Producto')
+
+	if products
+		.list.title
+			span
+				b Nombre
+			span
+				b Precio
+			span
+				b Acciones
+		each product in products
+			+addList(product)
+			

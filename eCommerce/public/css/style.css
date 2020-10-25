@@ -11,7 +11,8 @@ body {
   position: relative;
   float: left;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  padding-bottom: 50px;
 }
 
 a {
@@ -30,7 +31,8 @@ a {
 }
 
 
-form input {
+form input,
+form select {
   display: block;
   float: left;
   width: 100%;
@@ -130,7 +132,8 @@ form input {
 #user {
   max-width: 100%;
   width: 380px;
-  margin: 0 auto;
+  margin-left: 50%;
+  transform: translateX(-50%);
 }
 
 #footer a {
@@ -170,4 +173,50 @@ form input {
 
 #permissions li span {
   margin-left: 15px;
+}
+
+
+.half:nth-child(1) {
+  padding-right: 15px;
+}
+.half:nth-child(2) {
+  padding-left: 15px;
+}
+.half{
+  width: 50%;
+  float: left;
+}
+
+
+
+form {
+  background: #f9f9f9;
+  padding: 15px 20px;
+  margin: 25px 0;
+  float: left;
+  width: 100%;
+}
+
+#admin form,
+form.editForm {
+    display: none;
+}
+
+.list.title {
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  margin: 25px 0 10px;
+  text-align: center;
+}
+.list {
+  width: 100%;
+  float: left;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  grid-gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px dotted;
+}
+.list form {
+    grid-column: 1 / 4;
 }

@@ -4,15 +4,15 @@ const express = require('express')
 const router = express.Router()
 
 /* GET users listing. */
-router.get('/', User.isNotLoggedUser, UserController.renderLogin)
-router.post('/', User.isNotLoggedUser, UserController.setLogin)
+router.get('/', UserController.getPostData, User.isNotLoggedUser, UserController.renderForm)
+router.post('/', UserController.getPostData, User.isNotLoggedUser, UserController.getPostData, UserController.setLogin, User.isLoggedUser, User.goPanel)
 
-router.get('/register', User.isNotLoggedUser, UserController.renderRegister)
-router.post('/register', User.isNotLoggedUser, UserController.setRegister)
+router.get('/register', UserController.getPostData, UserController.renderRegister, User.isNotLoggedUser, UserController.renderForm)
+router.post('/register', UserController.getPostData, UserController.renderRegister, User.isNotLoggedUser, UserController.getPostData, UserController.setRegister, User.isLoggedUser, User.goPanel)
 
-router.get('/panel', User.isLoggedUser, UserController.renderPanel)
-router.post('/panel', User.isLoggedUser, UserController.updateUser)
+router.get('/panel', User.isLoggedUser, User.getLogged, UserController.renderPanel)
+router.post('/panel', User.isLoggedUser, User.getLogged, UserController.postUser, User.getLogged, UserController.renderPanel)
 
-router.get('/logout', User.isLoggedUser, User.logout)
+router.get('/logout', User.isLoggedUser, User.getLogged, User.logout)
 
 module.exports = router

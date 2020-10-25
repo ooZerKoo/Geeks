@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
-const saltRounds = process.env.SALT_ROUNDS
+const { JSONCookie } = require('cookie-parser')
+const saltRounds = parseInt(process.env.SALT_ROUNDS)
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
 
@@ -32,7 +33,6 @@ const UserSchema = mongoose.Schema(
     {
         toJSON: {
             transform: function(req, res){
-             //   delete res.role
                 delete res.password
                 return res
             }
@@ -115,7 +115,7 @@ UserSchema.statics.isLoggedUser = async function(req, res, next) {
         if (logged) {
             next()
         } else {
-            User.goLogin(req, res)
+            User.goLogin(req, res, next)
         }
     } catch (error) {
         console.error(error)
@@ -148,37 +148,46 @@ UserSchema.statics.isLoggedAdmin = async function(req, res, next) {
     }
 }
 
-UserSchema.methods.login = function(req, res) {
+UserSchema.methods.login = function(req, res, next) {
     req.session.user = this
-    User.goPanel(req, res)
+    next()
 }
 
-UserSchema.statics.goLogin = function(req, res) {
+UserSchema.statics.goLogin = function(req, res, next) {
     const baseUrl = req.baseUrl.split('/')
+    const register = req.extraVars.register
     switch ('/'+baseUrl[1]) {
         case process.env.ADMIN_ROUTE:
-            User.redirectAdminLogin(res)
+            User.redirectAdminLogin(req, res, next)
             break
         case process.env.USER_ROUTE:
-            User.redirectUserLogin(res)
+            if (register) {
+                User.redirectUserRegister(req, res, next)
+            } else {
+                User.redirectUserLogin(req, res, next)
+            }
             break
         default:
-            User.redirectUserLogin(res)
+            if (register) {
+                User.redirectUserRegister(req, res, next)
+            } else {
+                User.redirectUserLogin(req, res, next)
+            }
             break
     }
 }
 
-UserSchema.statics.goPanel = function(req, res) {
+UserSchema.statics.goPanel = function(req, res, next) {
     const baseUrl = req.baseUrl.split('/')
     switch ('/'+baseUrl[1]) {
         case process.env.ADMIN_ROUTE:
-            User.redirectAdminPanel(res)
+            User.redirectAdminPanel(req, res, next)
             break
             case process.env.USER_ROUTE:
-            User.redirectUserPanel(res)
+            User.redirectUserPanel(req, res, next)
             break
         default:
-            User.redirectUserPanel(res)
+            User.redirectUserPanel(req, res, next)
             break
     }
 }
@@ -203,17 +212,20 @@ UserSchema.statics.isUserRegistred = async function (login) {
     }
 }
 
-UserSchema.statics.getLogged = async function (req) {
+UserSchema.statics.getLogged = async function (req, res, next) {
     try {
         const id = req.session.user._id
         const user = await User.findById(id)
-        return user
+        const permissions = await User.getPermissions(user.role)
+        req.user = user
+        req.permissions = permissions
+        next()
     } catch (error) {
-        
+        console.error(error)
     }
 }
 
-UserSchema.methods.updatePswd = async function(password) {
+UserSchema.methods.updatePassword = async function(password) {
     const newPassword = await User.setPassword(password)
     return await User.findByIdAndUpdate(
         this._id,
@@ -222,25 +234,59 @@ UserSchema.methods.updatePswd = async function(password) {
     )
 }
 
-UserSchema.statics.redirectUserPanel = function (res) {
+UserSchema.statics.redirectUserPanel = function (req, res, next) {
     res.redirect('/user/panel')
 }
 
-UserSchema.statics.redirectUserLogin = function (res) {
-    res.redirect('/user')
+UserSchema.statics.redirectUserLogin = function (req, res, next) {
+    let vars = []
+    let vars_text = ''
+    if (req.extraVars) {
+        for (i in req.extraVars) {
+            if (i != 'password' && i != 'password2') {
+                vars.push(`${i}=${req.extraVars[i]}`)
+            }
+        }
+        vars_text = '?' + vars.join('&')
+    }
+    res.redirect('/user' + vars_text)
 }
 
-UserSchema.statics.redirectAdminPanel = function (res) {
+UserSchema.statics.redirectUserRegister = function (req, res, next) {
+    let vars = []
+    let vars_text = ''
+    if (req.extraVars) {
+        for (i in req.extraVars) {
+            if (i != 'password' && i != 'password2') {
+                vars.push(`${i}=${req.extraVars[i]}`)
+            }
+        }
+        vars_text = '?' + vars.join('&')
+    }
+    res.redirect('/user/register' + vars_text)
+}
+
+UserSchema.statics.redirectAdminPanel = function (req, res, next) {
     res.redirect('/admin/panel')
 }
 
-UserSchema.statics.redirectAdminLogin = function (res) {
+UserSchema.statics.redirectAdminLogin = function (req, res, next) {
+    let vars = []
+    let vars_text = ''
+    if (req.extraVars) {
+        for (i in req.extraVars) {
+            if (i != 'password' && i != 'password2') {
+                vars.push(`${i}=${req.extraVars[i]}`)
+            }
+        }
+        vars_text = '?' + vars.join('&')
+    }
     res.redirect('/admin')
 }
 
-UserSchema.methods.getUserPermissions = async function () {
+UserSchema.statics.getPermissions = async function (role) {
     try {
-        switch (this.role) {
+        switch (role) {
             case 'customer':
                 const customer = {
                     products: ['get'],
@@ -273,6 +319,50 @@ UserSchema.statics.checkPassword = (password, passwordDB) => {
     return bcrypt.compare(password, passwordDB)
 }
 
+UserSchema.statics.getAll = async function() {
+    try {
+        const users = await User.find()
+        return users
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+UserSchema.statics.getAllCustomers = async function() {
+    try {
+        const users = await User.find({role: 'customer'})
+        return users
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+UserSchema.statics.getAllAdmins = async function() {
+    try {
+        const users = await User.find({role: 'admin'})
+        return users
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+UserSchema.statics.getAllEmployees = async function() {
+    try {
+        const users = await User.find({role: 'employee'})
+        return users
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+UserSchema.statics.getAllEditors = async function() {
+    try {
+        const users = await User.find({role: 'editor'})
+        return users
+    } catch (error) {
+        console.error(error)
+    }
+}
 
 const User = mongoose.model('User', UserSchema);
 

@@ -2,5 +2,55 @@ extends ../layout_admin
 
 include ../admin/menu.pug
 
+mixin addForm(btn, formTitle, options = null)
+	div
+		if (options && options._id)
+			span.btn.toggleForm.float-right(data-id=options._id)=btn
+		else
+			span.btn.toggleForm.btn-secondary.float-right(data-id='new')=btn
+	form.adminForm(method='POST', data-id=options && options._id ? options._id : 'new')
+		if options && options._id
+			input(type='hidden', value=options._id, name='id')
+		.row
+			h3=formTitle
+		.row
+			.half
+				label Nombre
+				input(type='text', name='name', value=options && options.name ? options.name : '')
+			.half
+				label Enlace Amigable
+				input(type='text', name='url', value=options && options.url ? options.url : '')
+		.row
+			label Descripción
+			input(type='text', name='description', value=options && options.description ? options.description : '')
+		.row
+			input(type='submit', value=btn, class='btn btn-secondary')
+			if (options)
+				button(class='btn btn-delete float-right', type='submit', name='deleteForm', value=options._id) Eliminar
+
+mixin addList(data)
+	.list(data-id=data._id)
+		span= data.name
+		span= data.description
+		+addForm('Editar', 'Editar Categoría', data)
+
 block content
-  h1=title
+	h1=title
+	if error
+		p.error=error
+	if success
+		p.success=success
+	.row
+		+addForm('Añadir', 'Añadir Nueva Categoría')
+
+	if categories
+		.list.title
+			span
+				b Nombre
+			span
+				b Descripción
+			span
+				b Acciones
+		each category in categories
+			+addList(category)
+			

@@ -1,6 +1,9 @@
+const UserController = require('../controllers/UserController')
+const CategoryController = require('./CategoryController')
+
 const User = require('../models/User')
 const Product = require('../models/Product')
-const UserController = require('../controllers/UserController')
+const Category = require('../models/Category')
 
 const AdminController = {
     async setLogin(req, res) {
@@ -27,44 +30,60 @@ const AdminController = {
             console.error(error)
         }
     },
-    // render del panel de usuario
+    // renders de admin
     async renderPanel(req, res){
         try {
-            const adminVars = req.admin_vars
-            res.render('admin/home', {...adminVars})
+            const extraVars = req.extraVars
+            res.render('admin/home', {...extraVars, title: 'Panel de Administrador'})
         } catch (error) {
             console.error(error)
         }
     },
-
     async renderOrders(req, res){
         try {
-            const adminVars = req.admin_vars
-            res.render('admin/orders', {...adminVars, title: 'Pedidos'})
+            const extraVars = req.extraVars
+            res.render('admin/orders', {...extraVars, title: 'Pedidos'})
         } catch (error) {
             console.error(error)
         }
     },
     async renderProducts(req, res){
         try {
-            const adminVars = req.admin_vars
-            res.render('admin/products', {...adminVars, title: 'Productos'})
+            const extraVars = req.extraVars
+            const categories = await Category.getAll()
+            const products = await Product.getAll()
+            res.render('admin/products', {
+                ...extraVars,
+                categories: categories,
+                products: products,
+                title: 'Productos'
+            })
         } catch (error) {
             console.error(error)
         }
     },
-    async renderCategories(req, res){
+    async renderCategories(req, res, next){
         try {
-            const adminVars = req.admin_vars
-            res.render('admin/categories', {...adminVars, title: 'Categorías'})
+            const extraVars = req.extraVars
+            const categories = await Category.getAll()
+            res.render('admin/categories', {
+                ...extraVars,
+                categories: categories,
+                title: 'Categorías'
+            })
         } catch (error) {
             console.error(error)
         }
     },
     async renderCustomers(req, res){
         try {
-            const adminVars = req.admin_vars
-            res.render('admin/categories', {...adminVars, title: 'Clientes'})
+            const extraVars = req.extraVars
+            const customers = await User.getAllCustomers()
+            res.render('admin/customers', {
+                ...extraVars,
+                customers: customers,
+                title: 'Clientes'
+            })
         } catch (error) {
             console.error(error)
         }
@@ -72,16 +91,15 @@ const AdminController = {
     async renderMenus(req, res, next) {
         try {
             const url = process.env.ADMIN_ROUTE+'/panel/'
-            const adminVars = {
+            const extraVars = {
                 left_menu: [
                     {name: 'Inicio', url: url},
                     {name: 'Clientes', url: url+'customers'},
                     {name: 'Pedidos', url: url+'orders'},
                     {name: 'Categorías', url: url+'categories'},
                     {name: 'Productos', url: url+'products'},
-                ],
-                title: 'Panel de Administrador'}
-            req.admin_vars = adminVars
+                ]}
+            req.extraVars = extraVars
             next()
         } catch (error) {
             console.error(error)

@@ -1,123 +1,155 @@
 const User = require('../models/User')
 
 const UserController = {
-    // get /login
-    renderLogin(req, res) {
-        UserController.renderForm(req, res)
-    },
-    async setLogin(req, res) {
+    async setLogin(req, res, next) {
         try {
             // cogemos login + pswd
             const { login, password } = req.body
+            let error = ''
+            let success = ''
             // si están vacíos mandamos error
             if (!password || !login) {
-                const error = 'Rellena los campos necesarios'
-                UserController.renderForm(req, res, null, {user: login, error: error})
+                error = 'Rellena los campos necesarios'
             } else {
-                // buscamos un ususario con esos datos
-                const user = await User.findByCredentials(login, password)
+                user = await User.findByCredentials(login, password)
                 if (typeof user != 'object') {
-                    // si no lo encuentra mandamo error
-                    UserController.renderForm(req, res, null, {user: login, error : user})
-                } else {
-                    user.login(req, res)
+                    error = user
                 }
+            }
+            req.extraVars.error = error
+            req.extraVars.success = success
+            if (typeof user == 'object') {
+                user.login(req, res, next)
+            } else {
+                next()
             }
         } catch (error) {
             console.error(error)
         }
     },
-    renderRegister(req, res) {
-        UserController.renderForm(req, res, null, {register: true})
+    renderRegister(req, res, next) {
+        if (!req.extraVars) req.extraVars = {}
+        req.extraVars.register = 1
+        next()
     },
     // post registrarse
-    async setRegister(req, res) {
+    async setRegister(req, res, next) {
         try {
             // cogemos las variables del cuerpo
             const { ...data } = req.body
-            let r = ''
+            if (!req.extraVars) req.extraVars = {}
+            let error = ''
+            let success = ''
+
             // comprobamos los datos necesarios y se mandan errores
             if (!data) {
-                r = 'Debes rellenar los campos'
+                error = 'Debes rellenar los campos'
             } else if (!data.user) {
-                r = 'El nombre de usuario es necesario'
+                error = 'El nombre de usuario es necesario'
             } else if (data.user.length < process.env.LOGIN_LEN) {
-                r = 'El nombre de usuario tienes que ser de ' + process.env.LOGIN_LEN + ' o más caracteres'
+                error = 'El nombre de usuario tienes que ser de ' + process.env.LOGIN_LEN + ' o más caracteres'
             } else if (!data.email) {
-                r = 'El e-mail es necesario'
+                error = 'El e-mail es necesario'
             } else if(await User.isUserRegistred(data.user)){
-                r = 'El nombre de usuario ya está registrado'
+                error = 'El nombre de usuario ya está registrado'
             } else if (await User.isUserRegistred(data.email)) {
-                r = 'El e-mail ya está registrado'
+                error = 'El e-mail ya está registrado'
             } else if (data.password.length < process.env.PASSWD_LEN) {
-                r = 'La contraseña tiene que ser de ' + process.env.PASSWD_LEN + ' o más caracteres'
+                error = 'La contraseña tiene que ser de ' + process.env.PASSWD_LEN + ' o más caracteres'
             } else if (data.password != data.password2) {
-                r = 'Las contraseñas no concuerdan'
+                error = 'Las contraseñas no concuerdan'
             } else {
                 data.password = await User.setPassword(data.password)
-                // insertamos a la BBDD + creamos la sesión + redireccionamos a su panel de usuario
                 const user = await User.create(data)
-                await user.generateAuthToken()
-                user.login(req, res)
+                user.login(req, res, next)
+                success = 'Cuenta creada correctamente'
             }
-            let result = {error: r, register: true}
-            UserController.renderForm(req, res, null, result)
+            req.extraVars.error = error
+            req.extraVars.success = success
+            req.extraVars.register = 1
+            req.extraVars.login = data.user
+            req.extraVars.email = data.email
+            next()
         } catch (error) {
             console.error(error)
         }
     },
-    async updateUser(req, res) {
+    async postUser(req, res, next) {
         try {
             // cogemos variables del cuerpo
             const { ...data } = req.body
-            const user = await User.getLogged(req)
+            const user = req.user
+            if (!req.extraVars) req.extraVars = {}
+            let error = ''
+            let success = ''
+
             if (data.deleteToken) {
                 const token = user.tokens[data.deleteToken]
                 if (token) {
                     await user.removeAuthToken(token).then()
                 }
-                UserController.renderPanel(req, res, null, null, 'Token Eliminado')
+                success = 'Token Eliminado'
             } else if (data.addToken) {
                 await user.generateAuthToken()
-                UserController.renderPanel(req, res, null, null, 'Token Creado')
+                success = 'Token Creado'
             } else {
-                // comprobamos que las 2 pswd son iguales y mandamos errores
                 if (data.password.length == 0 || data.password2.length == 0) {
-                    UserController.renderPanel(req, res, null, 'Rellena las contraseñas')
+                    error = 'Rellena las contraseñas'
                 } else if (data.password != data.password2) {
-                    UserController.renderPanel(req, res, null, 'Las contraseñas no coinciden')
+                    error = 'Las contraseñas no coinciden'
                 } else {
-                    // encriptamos pasword y lo guardamos
-                    await user.updatePaswd(data.password)
-                    UserController.renderPanel(req, res, null, null, 'Contraseña actualizada')
+                    await user.updatePassword(data.password)
+                    success = 'Contraseña actualizada correctamente'
                 }
             }
+            req.extraVars.error = error
+            req.extraVars.success = success
+            next()
         } catch (error) {
             console.error(error)
         }
     },
     // render del formulario
-    renderForm(req, res, next, data = null){
-        const title = ((data && data.register) ? 'Regístrate' : 'Inicia Sesión')
-        res.render('pages/login', {
-            title: title,
-            data: data
-        })
+    async renderForm(req, res){
+        try {
+            const extraVars = req.extraVars
+            const title = extraVars && extraVars.register ? 'Regístrate' : 'Inicia Sesión'
+            res.render('pages/login', {
+                title: title,
+                ...extraVars,
+            })   
+        } catch (error) {
+            console.error(error)
+        }
     },
     // render del panel de usuario
-    async renderPanel(req, res, next, error = null, success = null){
+    async renderPanel(req, res, next){
         try {
-            const user = await User.getLogged(req)
-            const permissions = await user.getUserPermissions()
+            const user = req.user
+            const extraVars = req.extraVars
+            const permissions = req.permissions
             res.render('pages/user', {
                 title: 'Panel de Usuario',
                 user: user,
-                error: error,
-                success: success,
+                ...extraVars,
                 permissions: {...permissions},
             })
         } catch (error) {
             console.error(error)
+        }
+    },
+    getPostData(req, res, next) {
+        if (req.extraVars) {
+            next()
+        } else {
+            const { ...body } = req.body
+            if (Object.keys(body).length > 0) {
+                req.extraVars = body
+            } else {
+                const { ...query } = req.query
+                req.extraVars = query
+            }
+            next()
         }
     }
 }

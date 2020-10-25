@@ -2,13 +2,15 @@ extends ../layout
 
 block content
     h1.text-center=title
-    if data && data.error
-        div.error=data.error
+    if error
+        p.error=error
+    if success
+        p.success=success
     form(method='post', id='user')
-        if !data || !data.register
+        if !register
             .row
                 label E-mail o Usuario
-                input(type='text', name='login', placeholder='E-mail / Usuario', value=data ? data.user : '')
+                input(type='text', name='login', placeholder='E-mail / Usuario', value=login ? login : '')
             .row
                 label Contraseña
                 input(type='password', name='password')
@@ -18,13 +20,13 @@ block content
         else
             .row
                 label Usuario
-                input(type='text', name='user', placeholder='Usuario', value=data ? data.user : '')
+                input(type='text', name='user', placeholder='Usuario', value=login ? login : '')
             .row
                 label E-mail
-                input(type='text', name='email', placeholder='E-mail', value=data ? data.email : '')
+                input(type='text', name='email', placeholder='E-mail', value=email ? email : '')
             .row
                 label Aniversario
-                input(type='date', name='birthday', value=data ? data.birthday : '')
+                input(type='date', name='birthday', value=birthday ? birthday : '')
             .row
                 label Contraseña
                 input(type='password', name='password')

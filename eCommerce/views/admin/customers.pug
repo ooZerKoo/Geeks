@@ -2,5 +2,78 @@ extends ../layout_admin
 
 include ../admin/menu.pug
 
+mixin addForm(btn, formTitle, options = null)
+	div
+		if (options && options._id)
+			span.btn.toggleForm.float-right(data-id=options._id)=btn
+		else
+			span.btn.toggleForm.btn-secondary.float-right(data-id='new')=btn
+	form.adminForm(method='POST', data-id=options && options._id ? options._id : 'new')
+		if options && options._id
+			input(type='hidden', value=options._id, name='id')
+		.row
+			h3=formTitle
+		.row
+			.half
+				label Usuario
+				input(type='text', name='user', value=options && options.user ? options.user : '')
+			.half
+				label E-mail
+				input(type='text', name='email', value=options && options.email ? options.email : '')
+		.row
+			.half
+				label Nombre
+				input(type='text', name='name', value=options && options.name ? options.description : '')
+			.half
+				label Aniversario
+				input(type='date', name='birthday', value=options && options.birthday ? options.birthday : '')
+		.row
+			.half
+				label Contraseña
+				input(type='password', name='password')
+			.half
+				label Repetir Contraseña
+				input(type='password', name='password2')
+		.row
+			if options && options.tokens
+				label Tokens Usuario
+				if options.tokens.length > 0
+					.tokens
+						each token, id in options.tokens
+							input(type='text', class='token', value=token)
+							button(type='submit', value=id, class='btn btn-delete', name='deleteToken') X
+					.row
+						button(type='submit', value='1', class='btn btn-primary', name='addToken') Añadir Token
+				else
+					p.error No tiene tokens creados
+		.row
+			input(type='submit', value=btn, class='btn btn-secondary')
+			if (options)
+				button(class='btn btn-delete float-right', type='submit', name='deleteForm', value=options._id) Eliminar
+
+mixin addList(data)
+	.list(data-id=data._id)
+		span= data.name
+		span= data.description
+		+addForm('Editar', 'Editar Cliente', data)
+
 block content
-  h1=title
+	h1=title
+	if error
+		p.error=error
+	if success
+		p.success=success
+	.row
+		+addForm('Añadir', 'Añadir Nuevo Cliente')
+
+	if customers
+		.list.title
+			span
+				b Nombre
+			span
+				b Descripción
+			span
+				b Acciones
+		each customer in customers
+			+addList(customer)
+			
