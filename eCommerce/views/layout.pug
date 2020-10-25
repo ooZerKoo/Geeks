@@ -6,8 +6,11 @@ html
 		meta(charset="utf-8")
 		meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
 	body#front
-		block nav
-		block leftColumn
+		
+		#left_column
+			include ./pages/listing/userMenu
+			include ./pages/listing/categoriesMenu
+
 		.container
 			block content
 		block footer

@@ -15,20 +15,6 @@ mixin addForm(btn, formTitle, options = null)
 			h3=formTitle
 		.row
 			.half
-				label Usuario
-				input(type='text', name='user', value=options && options.user ? options.user : '')
-			.half
-				label E-mail
-				input(type='text', name='email', value=options && options.email ? options.email : '')
-		.row
-			.half
-				label Nombre
-				input(type='text', name='name', value=options && options.name ? options.description : '')
-			.half
-				label Aniversario
-				input(type='date', name='birthday', value=options && options.birthday ? options.birthday : '')
-		.row
-			.half
 				label Contraseña
 				input(type='password', name='password')
 			.half
@@ -42,10 +28,10 @@ mixin addForm(btn, formTitle, options = null)
 						each token, id in options.tokens
 							input(type='text', class='token', value=token)
 							button(type='submit', value=id, class='btn btn-delete', name='deleteToken') X
-					.row
-						button(type='submit', value='1', class='btn btn-primary', name='addToken') Añadir Token
 				else
 					p.error No tiene tokens creados
+			.row
+				button(type='submit', value='1', class='btn btn-primary', name='addToken') Añadir Token
 		.row
 			input(type='submit', value=btn, class='btn btn-secondary')
 			if (options)
@@ -53,8 +39,8 @@ mixin addForm(btn, formTitle, options = null)
 
 mixin addList(data)
 	.list(data-id=data._id)
-		span= data.name
-		span= data.description
+		span= data.user
+		span= data.email
 		+addForm('Editar', 'Editar Cliente', data)
 
 block content
@@ -71,7 +57,7 @@ block content
 			span
 				b Nombre
 			span
-				b Descripción
+				b Email
 			span
 				b Acciones
 		each customer in customers

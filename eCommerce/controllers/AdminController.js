@@ -1,30 +1,35 @@
 const UserController = require('../controllers/UserController')
-const CategoryController = require('./CategoryController')
 
 const User = require('../models/User')
 const Product = require('../models/Product')
 const Category = require('../models/Category')
 
 const AdminController = {
-    async setLogin(req, res) {
+    async setLogin(req, res, next) {
         try {
             // cogemos login + pswd
             const { login, password } = req.body
+            let error = ''
+            let success = ''
             // si están vacíos mandamos error
             if (!password || !login) {
-                const error = 'Rellena los campos necesarios'
-                UserController.renderForm(req, res, null, {login: login, error: error})
+                error = 'Rellena los campos necesarios'
             } else {
-                // buscamos un ususario con esos datos
-                const user = await User.findByCredentials(login, password)
+                user = await User.findByCredentials(login, password)
                 if (typeof user != 'object') {
-                    // si no lo encuentra mandamo error
-                    UserController.renderForm(req, res, null, {login: login, error : user})
-                } else if (user.role != 'admin'){
-                    UserController.renderForm(req, res, null, {login: login, error : 'No tienes permisos para entrar'})
+                    error = user
                 } else {
-                    user.login(req, res)
+                    if (user.role != 'admin')
+                    error = 'No tienes permisos para entrar'
                 }
+            }
+            req.extraVars.error = error
+            req.extraVars.success = success
+            req.extraVars.login = login
+            if (typeof user == 'object') {
+                user.login(req, res, next)
+            } else {
+                next()
             }
         } catch (error) {
             console.error(error)
@@ -90,14 +95,16 @@ const AdminController = {
     },
     async renderMenus(req, res, next) {
         try {
-            const url = process.env.ADMIN_ROUTE+'/panel/'
+            const url = process.env.ADMIN_ROUTE+'/'
+            const url_panel = url+'panel/'
             const extraVars = {
                 left_menu: [
-                    {name: 'Inicio', url: url},
-                    {name: 'Clientes', url: url+'customers'},
-                    {name: 'Pedidos', url: url+'orders'},
-                    {name: 'Categorías', url: url+'categories'},
-                    {name: 'Productos', url: url+'products'},
+                    {name: 'Inicio', url: url_panel},
+                    {name: 'Clientes', url: url_panel+'customers'},
+                    {name: 'Pedidos', url: url_panel+'orders'},
+                    {name: 'Categorías', url: url_panel+'categories'},
+                    {name: 'Productos', url: url_panel+'products'},
+                    {name: 'Salir', url: url+'logout'},
                 ]}
             req.extraVars = extraVars
             next()

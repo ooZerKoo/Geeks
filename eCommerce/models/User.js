@@ -125,10 +125,16 @@ UserSchema.statics.isLoggedUser = async function(req, res, next) {
 UserSchema.statics.isNotLoggedAdmin = async function(req, res, next) {
     try {
         const logged = req.session.user
-        if (!logged || logged.role != 'admin') {
+        if (!logged) {
             next()
         } else {
-            User.goPanel(req, res)
+            if (logged.role == 'admin') {
+                User.goPanel(req, res)
+            } else {
+                if (!req.extraVars) req.extraVars = {}
+                req.extraVars.error = 'No tienes permisos para entrar'
+                next()
+            }
         }
     } catch (error) {
         console.error(error)
@@ -138,8 +144,14 @@ UserSchema.statics.isNotLoggedAdmin = async function(req, res, next) {
 UserSchema.statics.isLoggedAdmin = async function(req, res, next) {
     try {
         const logged = req.session.user
-        if (logged && logged.role == 'admin') {
-            next()
+        if (logged) {
+            if (logged.role != 'admin') {
+                if (!req.extraVars) req.extraVars = {}
+                req.extraVars.error = 'No tienes permisos para entrar'
+                User.goLogin(req, res)
+            } else {
+                next()
+            }
         } else {
             User.goLogin(req, res)
         }
@@ -155,7 +167,7 @@ UserSchema.methods.login = function(req, res, next) {
 
 UserSchema.statics.goLogin = function(req, res, next) {
     const baseUrl = req.baseUrl.split('/')
-    const register = req.extraVars.register
+    const register = req.extraVars ? req.extraVars.register : null
     switch ('/'+baseUrl[1]) {
         case process.env.ADMIN_ROUTE:
             User.redirectAdminLogin(req, res, next)
@@ -239,31 +251,13 @@ UserSchema.statics.redirectUserPanel = function (req, res, next) {
 }
 
 UserSchema.statics.redirectUserLogin = function (req, res, next) {
-    let vars = []
-    let vars_text = ''
-    if (req.extraVars) {
-        for (i in req.extraVars) {
-            if (i != 'password' && i != 'password2') {
-                vars.push(`${i}=${req.extraVars[i]}`)
-            }
-        }
-        vars_text = '?' + vars.join('&')
-    }
-    res.redirect('/user' + vars_text)
+    const varsText = User.getExtraVars(req)
+    res.redirect('/user' + varsText)
 }
 
 UserSchema.statics.redirectUserRegister = function (req, res, next) {
-    let vars = []
-    let vars_text = ''
-    if (req.extraVars) {
-        for (i in req.extraVars) {
-            if (i != 'password' && i != 'password2') {
-                vars.push(`${i}=${req.extraVars[i]}`)
-            }
-        }
-        vars_text = '?' + vars.join('&')
-    }
-    res.redirect('/user/register' + vars_text)
+    const varsText = User.getExtraVars(req)
+    res.redirect('/user/register' + varsText)
 }
 
 UserSchema.statics.redirectAdminPanel = function (req, res, next) {
@@ -271,17 +265,25 @@ UserSchema.statics.redirectAdminPanel = function (req, res, next) {
 }
 
 UserSchema.statics.redirectAdminLogin = function (req, res, next) {
+    const varsText = User.getExtraVars(req)
+    res.redirect('/admin' + varsText)
+}
+
+UserSchema.statics.getExtraVars = function (req) {
     let vars = []
-    let vars_text = ''
+    let varsText = ''
     if (req.extraVars) {
+        const dontPutVar = ['password', 'password2', 'left_menu']
         for (i in req.extraVars) {
-            if (i != 'password' && i != 'password2') {
+            if (!dontPutVar.includes(i)) {
                 vars.push(`${i}=${req.extraVars[i]}`)
             }
         }
-        vars_text = '?' + vars.join('&')
+        if (vars.length > 0) {
+            varsText = '?' + vars.join('&')
+        }
     }
-    res.redirect('/admin')
+    return varsText
 }
 
 UserSchema.statics.getPermissions = async function (role) {

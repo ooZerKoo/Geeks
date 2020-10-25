@@ -1,5 +1,6 @@
 const Category = require('../models/Category')
 
+
 const CategoryController = {
     async postCategory(req, res, next) {
         try {
@@ -7,7 +8,6 @@ const CategoryController = {
             let error = null
             let success = null
             const id = data && data.id ? data.id : 0
-            console.log(data)
             if (!data) {
                 error = 'Rellena los campos'
             } else if (data.deleteForm) {
@@ -46,7 +46,49 @@ const CategoryController = {
         } catch (error) {
             console.error(error)
         }
+    },
+    async renderMenu(req, res, next) {
+        try {
+            if (!req.extraVars) req.extraVars = {}
+            const base_url = process.env.CATEGORY_ROUTE+'/'
+            const categories = await Category.getAll()
+            const categoriesMenu = []
+            for (i in categories) {
+                categoriesMenu.push({
+                    name: categories[i].name,
+                    url: base_url + categories[i].url
+                })
+            }
+            req.categoriesMenu = categoriesMenu
+            next()
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    async getCategory(req, res, next) {
+        try {
+            if (!req.extraVars) req.extraVars = {}
+            const { url } = req.params
+            const category = await Category.findOne({url: url})
+            req.category = category
+            next()
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    renderList(req, res) {
+        const products = req.products
+        const category = req.category
+        const userMenu = req.userMenu
+        const categoriesMenu = req.categoriesMenu
+        res.render('pages/category', {
+            products: products,
+            category: category,
+            userMenu: userMenu,
+            categoriesMenu: categoriesMenu,
+        })
     }
+
 }
 
 module.exports = CategoryController

@@ -7,8 +7,9 @@ const ProductController = require('../controllers/ProductController')
 const UserController = require('../controllers/UserController')
 const User = require('../models/User')
 
-router.get('/', User.isNotLoggedAdmin, UserController.renderForm)
-router.post('/', User.isNotLoggedAdmin, AdminController.setLogin)
+router.get('/', UserController.getPostData, User.isNotLoggedAdmin, UserController.renderForm)
+router.post('/', UserController.getPostData, User.isNotLoggedAdmin, UserController.getPostData, AdminController.setLogin, User.isLoggedAdmin, User.goPanel)
+
 router.get('/logout', User.isLoggedAdmin, AdminController.renderMenus, User.logout)
 
 router.get('/panel', User.isLoggedAdmin, AdminController.renderMenus, AdminController.renderPanel)

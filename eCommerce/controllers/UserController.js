@@ -78,7 +78,7 @@ const UserController = {
         try {
             // cogemos variables del cuerpo
             const { ...data } = req.body
-            const user = req.user
+            const user = data.id ? await User.findById(data.id) : req.user
             if (!req.extraVars) req.extraVars = {}
             let error = ''
             let success = ''
@@ -150,6 +150,21 @@ const UserController = {
                 req.extraVars = query
             }
             next()
+        }
+    },
+    async renderMenu(req, res, next) {
+        try {
+            const base_url = process.env.USER_ROUTE+'/'
+            const userMenu = []
+            if (req.session && req.session.user) {
+                userMenu.push({name: 'Tu cuenta', url: base_url})
+            } else {
+                userMenu.push({name: 'Inicia Sesión', url: base_url})
+            }
+            req.userMenu = userMenu
+            next()
+        } catch (error) {
+            console.error(error)
         }
     }
 }

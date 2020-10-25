@@ -1,46 +1,12 @@
 const Product = require('../models/Product');
 
 const ProductController = {
-
-    async getAll(req, res){
-        try {
-            const data = await Product.getAll()
-            res.render('product', { products: data})
-        } catch (error) {
-            console.error(error)
-        }
-    },
-    async getByCategory(req, res) {
-        try {
-            const { category } = req.params;
-            const { ...filters } = req.query;
-            
-            let query = {};
-
-            query.category = category;
-            
-            if (filters.hasOwnProperty('price')) {
-                let p = filters.price.split('-')
-                query.price = {$gte: p[0], $lte: p[1]}
-            }
-
-            if (filters.hasOwnProperty('discount')) {
-                query.discount = {$gt: 0}
-            }
-
-            const data = await Product.find(query);
-            res.render('product', { products: data })
-        } catch (error) {
-            console.error(error)
-        }
-    },
     async postProduct(req, res, next) {
         try {
             const { ...data } = req.body
             let error = null
             let success = null
             const id = data && data.id ? data.id : 0
-            console.log(data)
             if (!data) {
                 error = 'Rellena los campos'
             } else if (data.deleteForm) {
@@ -82,6 +48,29 @@ const ProductController = {
             }
             req.admin_vars.error = error
             req.admin_vars.success = success
+            next()
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    async getProduct(req, res, next) {
+        try {
+            const { url } = req.params
+            const product = await Product.findOne({url: url})
+            req.product = product
+            next()
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    renderProduct(req, res, next) {
+        res.render('pages/product', {product: req.product})
+    },
+    async getProductsCategory(req, res, next) {
+        try {
+            const category = req.category
+            const products = await Product.find({category: category._id})
+            req.products = products
             next()
         } catch (error) {
             console.error(error)
