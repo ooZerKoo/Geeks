@@ -13,7 +13,7 @@ const AdminController = {
             if (!password || !login) {
                 error.push(2)
             } else {
-                user = await User.findByCredentials(login, password)
+                user = await UserController.findByCredentials(login, password)
                 if (typeof user != 'object') {
                     error.push(user)
                 } else {
@@ -50,8 +50,8 @@ const AdminController = {
     },
     async renderProducts(req, res){
         try {
-            req.context.categories = await Category.getAll()
-            req.context.products = await Product.getAll()
+            req.context.categories = await Category.find()
+            req.context.products = await Product.find()
             res.render('admin/products', {...req.context, title: 'Productos'})
         } catch (error) {
             console.error(error)
@@ -59,7 +59,7 @@ const AdminController = {
     },
     async renderCategories(req, res, next){
         try {
-            req.context.categories = await Category.getAll()
+            req.context.categories = await Category.find()
             res.render('admin/categories', {...req.context, title: 'Categorías'})
         } catch (error) {
             console.error(error)
@@ -67,7 +67,7 @@ const AdminController = {
     },
     async renderCustomers(req, res){
         try {
-            req.context.customers = await User.getAllCustomers()
+            req.context.customers = await UserController.getAllCustomers()
             res.render('admin/customers', {...req.context, title: 'Clientes'})
         } catch (error) {
             console.error(error)

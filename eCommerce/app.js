@@ -13,7 +13,8 @@ const productsRouter = require('./routes/products');
 const categoriesRouter = require('./routes/categories');
 const adminRouter = require('./routes/admin');
 
-const ContextController = require('./controllers/ContextController')
+const ContextController = require('./controllers/ContextController');
+const CartController = require('./controllers/CartController');
 
 const app = express();
 
@@ -29,13 +30,15 @@ app.use(session({
   saveUninitialized: true
 }))
 
-app.use(ContextController.getContext, ContextController.logContext)
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(ContextController.getContext, ContextController.getPostData, ContextController.getExtraVars, CartController.updateCart)
+
 app.use('/', indexRouter);
 app.use(process.env.USER_ROUTE, usersRouter);
 app.use(process.env.PRODUCT_ROUTE, productsRouter);

@@ -8,34 +8,34 @@ const CategoryController = {
             let error, success = []
             const id = data && data.id ? data.id : 0
             if (!data) {
-                error.push('Rellena los campos')
+                error.push(3001)
             } else if (data.deleteForm) {
                 const deleteCategory = await Category.findByIdAndDelete(id)
                 if (deleteCategory) {
-                    success.push('Categoría eliminada correctamente')
+                    success.push(3001)
                 } else {
-                    error.push('Error al eliminar la categoría')
+                    error.push(3002)
                 }
             } else if (!data.name) {
-                error.push('Rellena el nombre')
+                error.push(3003)
             } else if (!data.url) {
-                error.push('Rellena el Enlace Amigable')
+                error.push(3004)
             } else if (await Category.exists(data.url, id)){
-                error.push('El Enlace Amigable ya existe')
+                error.push(3005)
             } else {
                 if (id !== 0) {
                     const updateCategory = await Category.findByIdAndUpdate(id,{...data})
                     if (updateCategory) {
-                        success.push('Categoría actualizada correctamente')
+                        success.push(3002)
                     } else {
-                        error.push('No se ha podido actualizar la categoría')
+                        error.push(3006)
                     }
                 } else {
                     const Addcategory = await Category.create(data)
                     if (Addcategory) {
-                        success.push('Categoría creada correctamente')
+                        success.push(3003)
                     } else {
-                        error.push('No se ha podido guardar la categoría')
+                        error.push(3007)
                     }
                 }
             }

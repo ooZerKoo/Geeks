@@ -1,19 +1,19 @@
-const UserController = require('../controllers/UserController')
-const User = require('../models/User')
 const express = require('express')
 const ContextController = require('../controllers/ContextController')
 const router = express.Router()
 
+const UserController = require('../controllers/UserController')
+
 /* GET users listing. */
-router.get('/', User.isNotLoggedUser, UserController.renderForm)
-router.post('/', User.isNotLoggedUser, ContextController.getPostData, UserController.setLogin, User.isLoggedUser, User.goPanel)
+router.get('/', UserController.isNotLoggedUser, UserController.renderForm)
+router.post('/', UserController.isNotLoggedUser, ContextController.getPostData, UserController.setLogin, ContextController.getExtraVars, UserController.goPanel)
 
-router.get('/register', UserController.renderRegister, User.isNotLoggedUser, UserController.renderForm)
-router.post('/register', UserController.renderRegister, User.isNotLoggedUser, ContextController.getPostData, UserController.setRegister, User.isLoggedUser, User.goPanel)
+router.get('/register', UserController.renderRegister, UserController.isNotLoggedUser, UserController.renderForm)
+router.post('/register', UserController.renderRegister, UserController.isNotLoggedUser, ContextController.getPostData, UserController.setRegister, ContextController.getExtraVars, UserController.goPanel)
 
-router.get('/panel', User.isLoggedUser, UserController.renderPanel)
-router.post('/panel', User.isLoggedUser, UserController.postUser, User.goPanel)
+router.get('/panel', UserController.isLoggedUser, UserController.renderPanel)
+router.post('/panel', UserController.isLoggedUser, ContextController.getPostData, UserController.postUser, ContextController.getExtraVars, UserController.goPanel)
 
-router.get('/logout', User.isLoggedUser, User.logout)
+router.get('/logout', UserController.isLoggedUser, UserController.logout)
 
 module.exports = router

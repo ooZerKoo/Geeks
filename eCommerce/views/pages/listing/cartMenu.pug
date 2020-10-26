@@ -1,0 +1,9 @@
+if cart && cart.length > 0
+  #cart
+    form(method='POST')
+      each v in cart
+        li
+          a.btn(href=v.link)=v.name
+          button.btn.btn-delete(type='submit', value=v._id, name='deleteCart') X
+    if totalCart
+      .price=totalCart

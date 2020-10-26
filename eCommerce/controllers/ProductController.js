@@ -1,4 +1,4 @@
-const Product = require('../models/Product');
+const Product = require('../models/Product')
 
 const ProductController = {
     async postProduct(req, res, next) {
@@ -11,37 +11,37 @@ const ProductController = {
             } else if (data.deleteForm) {
                 const deleteProduct = await Product.findByIdAndDelete(id)
                 if (deleteProduct) {
-                    success.push('Producto eliminada correctamente')
+                    success.push(2001)
                 } else {
-                    error.push('Error al eliminar el Producto')
+                    error.push(2002)
                 }
             } else if (!data.name) {
-                error.push('Rellena el nombre')
+                error.push(2003)
             } else if (!data.url) {
-                error.push('Rellena el Enlace Amigable')
+                error.push(2004)
             } else if (await Product.exists(data.url, id)){
-                error.push('El Enlace Amigable ya existe')
+                error.push(2005)
             } else if(!data.price) {
-                error.push('El Precio es necesario')
+                error.push(2006)
             } else if(!data.category) {
-                error.push('La Categoría es necesaria')
+                error.push(2007)
             } else if(!data.quantity) {
-                error.push('La cantidad es necesaria')
+                error.push(2008)
             } else {
                 if (id !== 0) {
                     const updateProduct = await Product.findByIdAndUpdate(id,{...data})
                     if (updateProduct) {
-                        success.push('Producto actualizado correctamente')
+                        success.push(2001)
                     } else {
-                        error.push('No se ha podido actualizar el Producto')
+                        error.push(2002)
                     }
                 } else {
                     data.Category = data.category
                     const AddProduct = await Product.create(data)
                     if (AddProduct) {
-                        success.push('Producto creado correctamente')
+                        success.push(2003)
                     } else {
-                        error.push('No se ha podido guardar el Producto')
+                        error.push(2004)
                     }
                 }
             }
@@ -52,18 +52,17 @@ const ProductController = {
             console.error(error)
         }
     },
-    async getProduct(req) {
+    async getProduct(req, res, next) {
         try {
             const { url } = req.params
-            req.context.product = await Product.findOne({url: url})
-            return
+            if (url) req.context.product = await Product.findOne({url: url})
+            next()
         } catch (error) {
             console.error(error)
         }
     },
     async renderProduct(req, res, next) {
         try {
-            await ProductController.getProduct(req)
             res.render('pages/product', {...req.context, title: req.context.product.name})
         } catch (error) {
             console.error(error)
@@ -74,6 +73,17 @@ const ProductController = {
             const category = req.context.category
             req.context.products = category ? await Product.find({category: category._id}) : null
             next()
+        } catch (error) {
+            console.error(error)
+        }
+    },
+    async redirectProduct(req, res, next) {
+        try {
+            const context = req.context
+            if (context) {
+                const product = req.context.product
+                res.redirect(product.link)
+            }
         } catch (error) {
             console.error(error)
         }

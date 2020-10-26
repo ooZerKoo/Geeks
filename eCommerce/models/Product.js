@@ -44,7 +44,7 @@ ProductSchema.virtual('finalPrice').get(function(){
             finalPrice -= this.price * (this.discount / 100);
         }
     }
-    return finalPrice;
+    return Math.round( finalPrice * 100 + Number.EPSILON ) / 100 ;
 })
 
 ProductSchema.virtual('getSymbol').get(function(){
