@@ -13,6 +13,7 @@ const productsRouter = require('./routes/products');
 const categoriesRouter = require('./routes/categories');
 const adminRouter = require('./routes/admin');
 
+const ContextController = require('./controllers/ContextController')
 
 const app = express();
 
@@ -27,6 +28,10 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }))
+
+app.use(ContextController.getContext, ContextController.logContext)
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

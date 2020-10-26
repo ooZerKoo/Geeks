@@ -17,10 +17,11 @@ body {
   grid-template-columns: 20% 80%;
 }
 
+
 #left_column {
     background: #f9f9f9;
     display: grid;
-    grid-template-rows: repeat(100, 60px);
+    grid-template-rows: repeat(auto-fill, minmax(50px, 1fr) );
     align-items: center;
     text-align: right;
     padding: 15px;
@@ -41,7 +42,7 @@ a {
   color: #1d1d1d;
 }
 
-.container {
+#container {
   margin: 0 auto;
   display: block;
   width: 100%;
@@ -117,6 +118,7 @@ form select {
   text-align: center;
   padding: 20px;
   margin: 15px auto;
+  list-style: none;
 }
 
 .btn.btn-primary {
@@ -137,6 +139,7 @@ form select {
   text-align: center;
   padding: 20px;
   margin: 15px auto;
+  list-style: none;
 }
 
 .tokens {
@@ -206,9 +209,7 @@ form select {
   float: left;
 }
 
-
-
-form {
+form.form {
   background: #f9f9f9;
   padding: 15px 20px;
   margin: 25px 0;
@@ -216,9 +217,9 @@ form {
   width: 100%;
 }
 
-#admin form,
+form.adminForm,
 form.editForm {
-    display: none;
+  display: none;
 }
 
 .list.title {
@@ -239,3 +240,4 @@ form.editForm {
 .list form {
     grid-column: 1 / 4;
 }
+

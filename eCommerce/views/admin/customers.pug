@@ -1,7 +1,5 @@
 extends ../layout_admin
 
-include ../admin/menu.pug
-
 mixin addForm(btn, formTitle, options = null)
 	div
 		if (options && options._id)
@@ -45,10 +43,6 @@ mixin addList(data)
 
 block content
 	h1=title
-	if error
-		p.error=error
-	if success
-		p.success=success
 	.row
 		+addForm('Añadir', 'Añadir Nuevo Cliente')
 

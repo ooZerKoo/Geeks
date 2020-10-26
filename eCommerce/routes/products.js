@@ -7,6 +7,6 @@ const UserController = require('../controllers/UserController')
 
 
 /* GET product's page. */
-router.get('/:url', CategoryController.renderMenu, UserController.renderMenu, ProductController.getProduct, ProductController.renderProduct)
+router.get('/:url', ProductController.renderProduct)
 
 module.exports = router

@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt')
-const { JSONCookie } = require('cookie-parser')
 const saltRounds = parseInt(process.env.SALT_ROUNDS)
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
@@ -39,6 +38,11 @@ const UserSchema = mongoose.Schema(
         }
     }
 )
+
+UserSchema.virtual('permissions').get(function(){
+    const permissions = User.getPermissions(this.role)
+    return permissions;
+})
 
 UserSchema.methods.generateAuthToken = async function () {
     try {
@@ -84,11 +88,11 @@ UserSchema.statics.findByCredentials = async function(login, password) {
             ]
         })
         if (!user) {
-            return 'Usuario no encontrado'
+            return 10
         }
         const check = await User.checkPassword(password, user.password)
         if (!check) {
-            return 'Contraseña Incorrecta'
+            return 11
         }
         return user
     } catch (error) {
@@ -109,16 +113,12 @@ UserSchema.statics.isNotLoggedUser = async function(req, res, next) {
     }
 }
 
-UserSchema.statics.isLoggedUser = async function(req, res, next) {
-    try {
-        const logged = req.session.user
-        if (logged) {
-            next()
-        } else {
-            User.goLogin(req, res, next)
-        }
-    } catch (error) {
-        console.error(error)
+UserSchema.statics.isLoggedUser = function(req, res, next) {
+    const logged = req.session.user
+    if (logged) {
+        next()
+    } else {
+        User.goLogin(req, res, next)
     }
 }
 
@@ -131,8 +131,7 @@ UserSchema.statics.isNotLoggedAdmin = async function(req, res, next) {
             if (logged.role == 'admin') {
                 User.goPanel(req, res)
             } else {
-                if (!req.extraVars) req.extraVars = {}
-                req.extraVars.error = 'No tienes permisos para entrar'
+                req.context.post.error = [30]
                 next()
             }
         }
@@ -146,14 +145,13 @@ UserSchema.statics.isLoggedAdmin = async function(req, res, next) {
         const logged = req.session.user
         if (logged) {
             if (logged.role != 'admin') {
-                if (!req.extraVars) req.extraVars = {}
-                req.extraVars.error = 'No tienes permisos para entrar'
-                User.goLogin(req, res)
+                req.context.post.error = [30]
+                User.goLogin(req, res, next)
             } else {
                 next()
             }
         } else {
-            User.goLogin(req, res)
+            User.goLogin(req, res, next)
         }
     } catch (error) {
         console.error(error)
@@ -167,7 +165,7 @@ UserSchema.methods.login = function(req, res, next) {
 
 UserSchema.statics.goLogin = function(req, res, next) {
     const baseUrl = req.baseUrl.split('/')
-    const register = req.extraVars ? req.extraVars.register : null
+    const register = req.context.register ? req.context.register : null
     switch ('/'+baseUrl[1]) {
         case process.env.ADMIN_ROUTE:
             User.redirectAdminLogin(req, res, next)
@@ -192,14 +190,12 @@ UserSchema.statics.goLogin = function(req, res, next) {
 UserSchema.statics.goPanel = function(req, res, next) {
     const baseUrl = req.baseUrl.split('/')
     switch ('/'+baseUrl[1]) {
+        default:
+        case process.env.USER_ROUTE:
+            User.redirectUserPanel(req, res, next)
+            break
         case process.env.ADMIN_ROUTE:
             User.redirectAdminPanel(req, res, next)
-            break
-            case process.env.USER_ROUTE:
-            User.redirectUserPanel(req, res, next)
-            break
-        default:
-            User.redirectUserPanel(req, res, next)
             break
     }
 }
@@ -224,14 +220,10 @@ UserSchema.statics.isUserRegistred = async function (login) {
     }
 }
 
-UserSchema.statics.getLogged = async function (req, res, next) {
+UserSchema.statics.getLogged = async function (req) {
     try {
-        const id = req.session.user._id
-        const user = await User.findById(id)
-        const permissions = await User.getPermissions(user.role)
-        req.user = user
-        req.permissions = permissions
-        next()
+        const id = req.session && req.session.user ? req.session.user._id : false
+        return id ? await User.findById(id) : null
     } catch (error) {
         console.error(error)
     }
@@ -247,7 +239,8 @@ UserSchema.methods.updatePassword = async function(password) {
 }
 
 UserSchema.statics.redirectUserPanel = function (req, res, next) {
-    res.redirect('/user/panel')
+    const varsText = User.getExtraVars(req, false)
+    res.redirect('/user/panel' + varsText)
 }
 
 UserSchema.statics.redirectUserLogin = function (req, res, next) {
@@ -261,7 +254,8 @@ UserSchema.statics.redirectUserRegister = function (req, res, next) {
 }
 
 UserSchema.statics.redirectAdminPanel = function (req, res, next) {
-    res.redirect('/admin/panel')
+    const varsText = User.getExtraVars(req, false)
+    res.redirect('/admin/panel' + varsText)
 }
 
 UserSchema.statics.redirectAdminLogin = function (req, res, next) {
@@ -269,47 +263,46 @@ UserSchema.statics.redirectAdminLogin = function (req, res, next) {
     res.redirect('/admin' + varsText)
 }
 
-UserSchema.statics.getExtraVars = function (req) {
+UserSchema.statics.getExtraVars = function (req, full = true) {
     let vars = []
+    let varsFinal = []
     let varsText = ''
-    if (req.extraVars) {
-        const dontPutVar = ['password', 'password2', 'left_menu']
-        for (i in req.extraVars) {
-            if (!dontPutVar.includes(i)) {
-                vars.push(`${i}=${req.extraVars[i]}`)
+    const dontPutVar = ['password', 'password2', 'leftColumn', 'post', 'user']
+    if (!full) {
+        dontPutVar.push('login')
+    }
+    const post = req.context.post
+    if (post) {
+        for (i in post) {
+            if (!dontPutVar.includes(i) && typeof post[i] != 'undefined' && post[i].length > 0) {
+                vars[i] = `${i}=${post[i]}`
             }
         }
-        if (vars.length > 0) {
-            varsText = '?' + vars.join('&')
-        }
+    }
+    for (v in vars) {
+        varsFinal.push(vars[v])
+    }
+    if (varsFinal.length > 0) {
+        varsText = '?' + varsFinal.join('&')
     }
     return varsText
 }
 
-UserSchema.statics.getPermissions = async function (role) {
-    try {
-        switch (role) {
-            case 'customer':
-                const customer = {
-                    products: ['get'],
-                    invoices: ['get'],
-                }
-                return customer
-            case 'admin':
-                let admin = {
-                    products: ['get', 'post', 'put', 'delete'],
-                    invoices: ['get', 'post', 'put', 'delete']
-                }
-                return admin
-            default:
-                let def = {
-                    products: ['get'],
-                    invoices: ['get'],
-                }
-                return def
-        }
-    } catch (error) {
-        console.error(error)
+UserSchema.statics.getPermissions = function (role) {
+    switch (role) {
+        default:
+        case 'customer':
+            const customer = {
+                products: ['get'],
+                invoices: ['get'],
+            }
+            return customer
+        case 'admin':
+            let admin = {
+                products: ['get', 'post', 'put', 'delete'],
+                invoices: ['get', 'post', 'put', 'delete']
+            }
+            return admin
     }
 }
 

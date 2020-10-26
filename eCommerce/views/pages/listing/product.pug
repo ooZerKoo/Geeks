@@ -1,8 +1,11 @@
-li.product
-  h3=product.name
-  h4=product.description
-
-  span.price=product.price+product.getSymbol
-  if product.discount > 0
-    span.price-discount=' -'+product.discount+(product.discountType == 'amount' ? product.getSymbol : '%')
-    span.price-final=product.finalPrice+product.getSymbol
+.row
+  h1=product.name
+  h2=product.description
+  .row
+    span.price=product.price+product.getSymbol
+    if product.discount > 0
+      span.price-discount=' -'+product.discount+(product.discountType == 'amount' ? product.getSymbol : '%')
+      span.price-final=product.finalPrice+product.getSymbol
+  .row
+    form(method='POST')
+      button.btn.btn-secondary(type='submit', value=product._id, name='addToCart') Comprar

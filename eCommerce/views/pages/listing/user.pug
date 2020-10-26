@@ -1,5 +1,43 @@
 div.user
-  h3=user.user
-  li=user.email
-  li=user.role
-  li=user.birthday
+	h2 Bienvenido, #{user.user}
+	.row
+		span= user.email
+	.row
+		h3 Modifica tus datos
+		
+		form.form(method='POST')
+			.row
+				label(for='birthday') Aniversario
+				input(name='birthday', type='date', value=user.birthday)
+			.row
+				.half
+					label(for='password') Cambiar Contraseña
+					input(name='password', type='password')
+				.half
+					label(for='password2') Confirma la contraseña
+					input(name='password2', type='password')
+			.row
+				input(type='submit', value='Actualizar', class='btn btn-primary')
+	
+		.row
+			h3 Tokens para tu API
+			form.form(method='POST')
+				.row
+					if user.tokens.length > 0
+						.tokens
+							each token, id in user.tokens
+								input(type='text', class='token', value=token)
+								button(type='submit', value=id, class='btn btn-delete', name='deleteToken') X
+					else
+						p.error No tienes tokens creados
+				.row
+					button(type='submit', value='1', class='btn btn-primary', name='addToken') Añadir Token
+
+		#permissions.row
+			h3 Permisos en tu API
+			each perms, t in user.permissions
+				li=t
+					each p in perms
+						span.btn.float-right=p
+		.row
+			a(href='/user/logout', class='btn btn-secondary') Cerrar Sesión

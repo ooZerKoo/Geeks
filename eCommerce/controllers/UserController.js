@@ -4,20 +4,17 @@ const UserController = {
     async setLogin(req, res, next) {
         try {
             // cogemos login + pswd
-            const { login, password } = req.body
-            let error = ''
-            let success = ''
+            const { login, password } = req.context.post
+            const error = []
+            const success = []
             // si están vacíos mandamos error
-            if (!password || !login) {
-                error = 'Rellena los campos necesarios'
-            } else {
-                user = await User.findByCredentials(login, password)
-                if (typeof user != 'object') {
-                    error = user
-                }
-            }
-            req.extraVars.error = error
-            req.extraVars.success = success
+            if (!password || !login) error.push(2)
+
+            user = await User.findByCredentials(login, password)
+            if (typeof user != 'object') error.push(user)
+            
+            req.context.post.error = error
+            req.context.post.success = success
             if (typeof user == 'object') {
                 user.login(req, res, next)
             } else {
@@ -28,8 +25,7 @@ const UserController = {
         }
     },
     renderRegister(req, res, next) {
-        if (!req.extraVars) req.extraVars = {}
-        req.extraVars.register = 1
+        req.context.register = 1
         next()
     },
     // post registrarse
@@ -37,38 +33,29 @@ const UserController = {
         try {
             // cogemos las variables del cuerpo
             const { ...data } = req.body
-            if (!req.extraVars) req.extraVars = {}
-            let error = ''
-            let success = ''
-
+            const error = []
+            const success = []
             // comprobamos los datos necesarios y se mandan errores
-            if (!data) {
-                error = 'Debes rellenar los campos'
-            } else if (!data.user) {
-                error = 'El nombre de usuario es necesario'
-            } else if (data.user.length < process.env.LOGIN_LEN) {
-                error = 'El nombre de usuario tienes que ser de ' + process.env.LOGIN_LEN + ' o más caracteres'
-            } else if (!data.email) {
-                error = 'El e-mail es necesario'
-            } else if(await User.isUserRegistred(data.user)){
-                error = 'El nombre de usuario ya está registrado'
-            } else if (await User.isUserRegistred(data.email)) {
-                error = 'El e-mail ya está registrado'
-            } else if (data.password.length < process.env.PASSWD_LEN) {
-                error = 'La contraseña tiene que ser de ' + process.env.PASSWD_LEN + ' o más caracteres'
-            } else if (data.password != data.password2) {
-                error = 'Las contraseñas no concuerdan'
-            } else {
+            if (!data) error.push(2)
+            if (!data.user) error.push(4)
+            if (data.user.length < process.env.LOGIN_LEN) error.push(5)
+            if (!data.email) error.push(6)
+            if (await User.isUserRegistred(data.user)) error.push(7)
+            if (await User.isUserRegistred(data.email)) error.push(8)
+            if (data.password.length < process.env.PASSWD_LEN) error.push(9)
+            if (data.password != data.password2) error.push(3)
+            
+            if (error.length == 0) {
                 data.password = await User.setPassword(data.password)
                 const user = await User.create(data)
                 user.login(req, res, next)
-                success = 'Cuenta creada correctamente'
+                success.push(4)
             }
-            req.extraVars.error = error
-            req.extraVars.success = success
-            req.extraVars.register = 1
-            req.extraVars.login = data.user
-            req.extraVars.email = data.email
+            req.context.post.error = error
+            req.context.post.success = success
+            req.context.post.login = data.user
+            req.context.post.email = data.email
+            req.context.register = 1
             next()
         } catch (error) {
             console.error(error)
@@ -78,32 +65,31 @@ const UserController = {
         try {
             // cogemos variables del cuerpo
             const { ...data } = req.body
-            const user = data.id ? await User.findById(data.id) : req.user
-            if (!req.extraVars) req.extraVars = {}
-            let error = ''
-            let success = ''
+            const user = data.id ? await User.findById(data.id) : req.context.user
+            const error = []
+            const success = []
 
             if (data.deleteToken) {
                 const token = user.tokens[data.deleteToken]
                 if (token) {
-                    await user.removeAuthToken(token).then()
+                    await user.removeAuthToken(token)
+                    success.push(1)
                 }
-                success = 'Token Eliminado'
             } else if (data.addToken) {
                 await user.generateAuthToken()
-                success = 'Token Creado'
+                success.push(2)
             } else {
                 if (data.password.length == 0 || data.password2.length == 0) {
-                    error = 'Rellena las contraseñas'
+                    error.push(1)
                 } else if (data.password != data.password2) {
-                    error = 'Las contraseñas no coinciden'
+                    error.push(3)
                 } else {
                     await user.updatePassword(data.password)
-                    success = 'Contraseña actualizada correctamente'
+                    success.push(3)
                 }
             }
-            req.extraVars.error = error
-            req.extraVars.success = success
+            req.context.post.error = error
+            req.context.post.success = success
             next()
         } catch (error) {
             console.error(error)
@@ -112,12 +98,8 @@ const UserController = {
     // render del formulario
     async renderForm(req, res){
         try {
-            const extraVars = req.extraVars
-            const title = extraVars && extraVars.register ? 'Regístrate' : 'Inicia Sesión'
-            res.render('pages/login', {
-                title: title,
-                ...extraVars,
-            })   
+            const title = req.context && req.context.register ? 'Regístrate' : 'Inicia Sesión'
+            res.render('pages/login', {title: title, ...req.context,})
         } catch (error) {
             console.error(error)
         }
@@ -125,34 +107,12 @@ const UserController = {
     // render del panel de usuario
     async renderPanel(req, res, next){
         try {
-            const user = req.user
-            const extraVars = req.extraVars
-            const permissions = req.permissions
-            res.render('pages/user', {
-                title: 'Panel de Usuario',
-                user: user,
-                ...extraVars,
-                permissions: {...permissions},
-            })
+            res.render('pages/user', {title: 'Panel de Usuario', ...req.context})
         } catch (error) {
             console.error(error)
         }
     },
-    getPostData(req, res, next) {
-        if (req.extraVars) {
-            next()
-        } else {
-            const { ...body } = req.body
-            if (Object.keys(body).length > 0) {
-                req.extraVars = body
-            } else {
-                const { ...query } = req.query
-                req.extraVars = query
-            }
-            next()
-        }
-    },
-    async renderMenu(req, res, next) {
+    async renderMenu(req) {
         try {
             const base_url = process.env.USER_ROUTE+'/'
             const userMenu = []
@@ -161,8 +121,7 @@ const UserController = {
             } else {
                 userMenu.push({name: 'Inicia Sesión', url: base_url})
             }
-            req.userMenu = userMenu
-            next()
+            return userMenu
         } catch (error) {
             console.error(error)
         }

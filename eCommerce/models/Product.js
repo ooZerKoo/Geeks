@@ -54,6 +54,10 @@ ProductSchema.virtual('getSymbol').get(function(){
     return ' €';
 })
 
+ProductSchema.virtual('link').get(function(){
+    return process.env.BASE_URL +process.env.PRODUCT_ROUTE + '/' + this.url;
+})
+
 ProductSchema.statics.getAll = async function() {
     try {
         const products = await Product.find()

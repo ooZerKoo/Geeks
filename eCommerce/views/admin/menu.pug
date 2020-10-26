@@ -1,4 +1,3 @@
-block leftColumn
-  #left_column
-    each url in left_menu
-      a.btn(href=url.url)=url.name
+if leftColumn.adminMenu && leftColumn.adminMenu.length > 0
+	each v in leftColumn.adminMenu
+		a.btn(href=v.url)=v.name

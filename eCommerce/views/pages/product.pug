@@ -2,6 +2,8 @@ extends ../layout
 
 block content
   if products
-    h1 Productos
+    h1=title
     each product in products
-      include listing/product.pug
+      include listing/productList.pug
+  if product
+    include listing/product.pug

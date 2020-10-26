@@ -5,14 +5,20 @@ html
 		link(rel='stylesheet', href='/css/style.css')
 		meta(charset="utf-8")
 		meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
-	body#admin
-		block nav
-		block leftColumn
-		.container
+	body
+		
+		#left_column
+			if leftColumn
+				include ./admin/menu
+
+		#container
+			include ./pages/listing/messages
 			block content
-		block footer
-			#footer
+		
+		#footer
+			block footer
 				a(href="https://www.urimarti.com", target='_blank') Web creada por urimarti
+		
 		block scripts
 			script(src="https://code.jquery.com/jquery-3.5.1.min.js")
 			script(src="/js/script.js")

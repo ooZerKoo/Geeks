@@ -1,3 +1,3 @@
-if categoriesMenu
-	each v in categoriesMenu
+if leftColumn.categoryMenu && leftColumn.categoryMenu.length > 0
+	each v in leftColumn.categoryMenu
 		a(href=v.url)=v.name
