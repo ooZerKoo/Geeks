@@ -241,3 +241,134 @@ form.editForm {
     grid-column: 1 / 4;
 }
 
+#productList {
+  display: grid;
+  grid-template-columns: 3fr 3fr 3fr;
+  grid-gap: 20px;
+  grid-template-rows: repeat(auto-fill, minmax(250px, 1fr) );
+}
+.product {
+    display: grid;
+    grid-auto-rows: 100px minmax(0, auto) 110px 45px;
+    box-shadow: 0 0 30px -25px #1d1d1d;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+#productPage .prices {
+  font-size: 1.3eM;
+  background-color: #eee;
+  border: 3px solid;
+}
+.prices {
+  padding: 25px;
+  display: grid;
+  grid-template-rows: repeat(3, minmax(45px, auto));
+  grid-template-columns: repeat(2, 1fr);
+  /*! align-items: center; */
+}
+
+.product h3 {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.price {
+  font-weight: bold;
+  font-size: 1.5eM;
+}
+
+.price {
+  font-weight: bold;
+  font-size: 1.5eM;
+}
+.price-before {
+  color: #666;
+  text-decoration: line-through;
+}
+
+.product .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#productPage {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: repeat(auto-fill, minmax(50px, 1fr));
+    grid-gap: 25px;
+}
+
+#productPage h1 {
+  grid-column: 1 / span 2
+}
+
+.prices form {
+    grid-column: 1 / span 3;
+}
+.prices span {
+  display: flex;
+  padding: 0 5px;
+}
+.prices .btn {
+  width: 100%;
+  font-size: initial;
+}
+.prices .price {
+  grid-row: 1 / span 2;
+  justify-content: right;
+  align-items: center;
+}
+.prices .price-before {
+  grid-column: 2 / 2;
+  grid-row: 1;
+  align-items: end;
+}
+.prices .price-discount {
+  grid-column: 2 / 2;
+  grid-row: 2;
+  align-content: start;
+  align-items: start;
+  /*! align-self: start; */
+}
+
+#cart:hover form {
+  display: grid;
+}
+
+#cart form {
+  display: none;
+  grid-template-columns: 100%;
+  position: absolute;
+  width: 100%;
+  background: #1d1d1d;
+  padding: 15px;
+  top: 100%;
+  left: 0;
+  transform: translateY(0);
+  grid-gap: 20px;
+}
+#cart form li {
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+  grid-column-gap: 10px;
+  grid-row-gap: 15px;
+}
+#cart {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(auto-fill, minmax(25px, 1fr));
+  grid-gap: 15px;
+  position: relative;
+}
+
+#cart form .price {
+  color: white;
+}
+
+#cart .btn span {
+  margin-right: 15px;
+}

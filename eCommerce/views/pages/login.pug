@@ -3,7 +3,7 @@ extends ../layout
 block content
 	h1.text-center=title
 	form.form(method='post', id='user')
-		if !register
+		if !post.register && !register
 			.row
 				label E-mail o Usuario
 				input(type='text', name='login', placeholder='E-mail / Usuario', value=login ? login : '')
@@ -11,7 +11,7 @@ block content
 				label Contraseña
 				input(type='password', name='password')
 			.row
-				input(type='submit', value='Login', class='btn btn-secondary')
+				button(type='submit', value='1', class='btn btn-primary', name='submitLogin') Login
 				a(href='/user/register', class='btn float-right') ¿No estás registrad@?
 		else
 			.row
@@ -30,5 +30,5 @@ block content
 				label Repite la Contraseña
 				input(type='password', name='password2')
 			.row
-				input(type='submit', value='Regístrate', class='btn btn-primary')
+				button(type='submit', value='1', class='btn btn-primary', name='submitRegister') Regístrate
 				a(href='/user', class='btn float-right') ¿Ya estás registrad@?

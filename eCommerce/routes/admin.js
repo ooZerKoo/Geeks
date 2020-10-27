@@ -7,22 +7,68 @@ const ContextController = require('../controllers/ContextController')
 const ProductController = require('../controllers/ProductController')
 const UserController = require('../controllers/UserController')
 
-router.get('/', UserController.isNotLoggedAdmin, UserController.renderForm)
-router.post('/', UserController.isNotLoggedAdmin, ContextController.getPostData, AdminController.setLogin, UserController.isLoggedAdmin, UserController.goPanel)
 
-router.get('/logout', UserController.isLoggedAdmin, UserController.logout)
+// LOGIN
+router.get('/',
+    UserController.isNotLoggedAdmin,    // comprobamos si está loggeado
+    UserController.renderForm           // mostramos el login
+)
+router.post('/',
+    UserController.isNotLoggedAdmin,    // comprobamos si está loggeado
+    ContextController.getPostData,      // cogemos las variables en context.post
+    AdminController.setLogin,           // loggeamos el usuario
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    UserController.goPanel              // redireccionamos al panel de amdmin
+)
+// LOGOUT
+router.get('/logout',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    UserController.logout               // cerramos sesión
+)
 
-router.get('/panel', UserController.isLoggedAdmin, AdminController.renderPanel)
+// PANEL - HOME
+router.get('/panel',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    AdminController.renderPanel         // rendarizamos el panel de admin
+)
 
-router.get('/panel/products', UserController.isLoggedAdmin, AdminController.renderProducts)
-router.post('/panel/products', UserController.isLoggedAdmin, ProductController.postProduct, AdminController.renderProducts)
+// PANEL - PRODUCTS
+router.get('/panel/products',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    AdminController.renderProducts
+)
+router.post('/panel/products',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    ProductController.postProduct,      // actualizamos / insertamos Producto
+    AdminController.renderProducts      // rendarizamos el panel de Produtos
+)
 
-router.get('/panel/orders', UserController.isLoggedAdmin, AdminController.renderOrders)
+// PANEL - ORDERS
+router.get('/panel/orders',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    AdminController.renderOrders        // rendarizamos el panel de Pedidos
+)
+router.get('/panel/categories',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    AdminController.renderCategories    // rendarizamos el panel de Categorías
+)
 
-router.get('/panel/categories', UserController.isLoggedAdmin, AdminController.renderCategories)
-router.post('/panel/categories', UserController.isLoggedAdmin, CategoryController.postCategory, AdminController.renderCategories)
+// PANEL - CATEGORIES
+router.post('/panel/categories',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    CategoryController.postCategory,    // actualizamos / insertamos Categoría
+    AdminController.renderCategories    // rendarizamos el panel de Categorías
+)
 
-router.get('/panel/customers', UserController.isLoggedAdmin, AdminController.renderCustomers)
-router.post('/panel/customers', UserController.isLoggedAdmin, UserController.postUser, AdminController.renderCustomers)
+// PANEL - CUSTOMERS
+router.get('/panel/customers',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    AdminController.renderCustomers     // rendarizamos el panel de Clientes
+)
+router.post('/panel/customers',
+    UserController.isLoggedAdmin,       // comprobamos si está loggeado
+    UserController.postUser,            // actualizamos / insertamos Cliente
+    AdminController.renderCustomers     // rendarizamos el panel de Clientes
+)
 
 module.exports = router

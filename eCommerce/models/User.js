@@ -79,14 +79,21 @@ UserSchema.methods.removeAuthToken = async function (token) {
 
 UserSchema.methods.login = function(req, res, next) {
     req.session.user = { _id: this._id, role: this.role}
+    const cart = req.session.cart
+    const userCart = this.cart
+    if (cart.length > 0) {
+        for (c in cart) {
+            userCart.push(cart[c])
+        }
+    }
+    req.session.cart = userCart
     next()
 }
 
 UserSchema.methods.updatePassword = async function(password) {
-    const newPassword = await UserController.setPassword(password)
     return await User.findByIdAndUpdate(
         this._id,
-        {password: newPassword},
+        {password: password},
         {new: true}
     )
 }

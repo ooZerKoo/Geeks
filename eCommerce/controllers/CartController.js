@@ -47,7 +47,7 @@ const CartController = {
                 for (i in products) {
                     total += products[i].finalPrice
                 }
-                req.context.totalCart = total
+                req.context.totalCart =  Math.round( total * 100 + Number.EPSILON ) / 100 ;
             }
             next()
         } catch (error) {

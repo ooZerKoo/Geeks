@@ -3,7 +3,8 @@ extends ../layout
 block content
   if products
     h1=title
-    each product in products
-      include listing/productList.pug
+    #productList
+      each product in products
+        include listing/productList.pug
   if product
     include listing/product.pug

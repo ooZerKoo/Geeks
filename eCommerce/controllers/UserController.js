@@ -7,20 +7,23 @@ const UserController = {
     async setLogin(req, res, next) {
         try {
             // cogemos login + pswd
-            const { login, password } = req.context.post
-            if (typeof login != 'undefined' && typeof password != 'undefined') {
-                const error = []
-                const success = []
-                // si están vacíos mandamos error
-                if (!password || !login) error.push(1002)
-                
-                user = await UserController.findByCredentials(login, password)
-                if (typeof user != 'object') error.push(user)
-                
-                req.context.post.error = error
-                req.context.post.success = success
-                if (typeof user == 'object') {
-                    user.login(req, res, next)
+            const { submitLogin } = req.body
+            if (submitLogin) {
+                const { login, password } = req.context.post
+                if (typeof login != 'undefined' && typeof password != 'undefined') {
+                    const error = []
+                    const success = []
+                    // si están vacíos mandamos error
+                    if (!password || !login) error.push(1002)
+                    
+                    user = await UserController.findByCredentials(login, password)
+                    if (typeof user != 'object') error.push(user)
+                    
+                    req.context.post.error = error
+                    req.context.post.success = success
+                    if (typeof user == 'object') {
+                        user.login(req, res, next)
+                    }
                 }
             }
             next()
@@ -29,37 +32,59 @@ const UserController = {
         }
     },
     renderRegister(req, res, next) {
-        req.context.register = 1
+        if (req.context) {
+            if (!req.context.post) req.context.post = {}
+        }
+        req.context.post.register = 1
         next()
     },
     // post registrarse
     async setRegister(req, res, next) {
         try {
             // cogemos las variables del cuerpo
-            const { ...data } = req.body
-            const error = []
-            const success = []
-            // comprobamos los datos necesarios y se mandan errores
-            if (!data) error.push(1002)
-            if (!data.user) error.push(1004)
-            if (data.user.length < process.env.LOGIN_LEN) error.push(1005)
-            if (!data.email) error.push(1006)
-            if (await UserController.isUserRegistred(data.user)) error.push(1007)
-            if (await UserController.isUserRegistred(data.email)) error.push(1008)
-            if (data.password.length < process.env.PASSWD_LEN) error.push(1009)
-            if (data.password != data.password2) error.push(1003)
-            
-            if (error.length == 0) {
-                data.password = await UserController.setPassword(data.password)
-                const user = await User.create(data)
-                user.login(req, res, next)
-                success.push(1004)
+            const { submitRegister } = req.body
+            if (submitRegister) {
+                const data = req.context.post
+                const error = []
+                const success = []
+                // comprobamos los datos necesarios y se mandan errores
+                if (!data) {
+                    error.push(1002)
+                } else {
+                    if (!data.user) {
+                        error.push(1004)
+                    } else if (data.user.length < process.env.LOGIN_LEN) {
+                        error.push(1005)
+                    }
+                    if (!data.email) {
+                        error.push(1006)
+                    }
+                    // miramos si el email o usuario están registrados
+                    if (await UserController.isUserRegistred(data.user)) error.push(1007)
+                    if (await UserController.isUserRegistred(data.email)) error.push(1008)
+                    // comprobamos que las contraseñas sean iguales y que tengan el largo acordado
+                    if (data.password && data.password2) {
+                        if (data.password.length < process.env.PASSWD_LEN) error.push(1009)
+                        if (data.password != data.password2) error.push(1003)
+                    } else {
+                        error.push(1002)
+                    }
+                }
+                req.context.post.error = error
+                req.context.post.success = success
+                req.context.post.login = data.user
+                req.context.post.email = data.email
+                req.context.post.register = 1
+                // si no hay errores, creamos el usuario
+                if (error.length == 0) {
+                    success.push(1004)
+                    req.context.post.success = success
+                    data.password = await UserController.setPassword(data.password)
+                    const user = await User.create(data)
+                    user.generateAuthToken()
+                    user.login(req, res, next)
+                }
             }
-            req.context.post.error = error
-            req.context.post.success = success
-            req.context.post.login = data.user
-            req.context.post.email = data.email
-            req.context.register = 1
             next()
         } catch (error) {
             console.error(error)
@@ -89,7 +114,8 @@ const UserController = {
                         } else if (data.password != data.password2) {
                             error.push(1003)
                         } else {
-                            await user.updatePassword(data.password)
+                            const password = await UserController.setPassword(data.password)
+                            await user.updatePassword(password)
                             success.push(1003)
                         }
                     } else {
@@ -107,8 +133,8 @@ const UserController = {
     // render del formulario
     async renderForm(req, res){
         try {
-            const title = req.context && req.context.register ? 'Regístrate' : 'Inicia Sesión'
-            res.render('pages/login', {title: title, ...req.context,})
+            const title = req.context.post.register ? 'Regístrate' : 'Inicia Sesión'
+            res.render('pages/login', {title: title, ...req.context})
         } catch (error) {
             console.error(error)
         }
@@ -191,23 +217,37 @@ const UserController = {
     },
     goPanel(req, res, next) {
         const baseUrl = req.baseUrl.split('/')
+        const user = req.session.user
         switch ('/'+baseUrl[1]) {
             default:
             case process.env.USER_ROUTE:
-                UserController.redirectUserPanel(req, res, next)
+                if (user) {
+                    if (req.context.post.resgister) {
+                        req.context.post.error = []
+                    }
+                    UserController.redirectUserPanel(req, res, next)
+                } else {
+                    if (req.context.post.register) {
+                        UserController.redirectUserRegister(req, res, next)
+                    } else {
+                        UserController.redirectUserLogin(req, res, next)
+                    }
+                }
                 break
             case process.env.ADMIN_ROUTE:
-                UserController.redirectAdminPanel(req, res, next)
+                if (user) {
+                    UserController.redirectAdminPanel(req, res, next)
+                } else {
+                    UserController.redirectAdminLogin(req, res, next)
+                }
                 break
         }
     },
     goLogin(req, res, next) {
         const baseUrl = req.baseUrl.split('/')
-        const register = req.context.register ? req.context.register : null
+        const register = req.context.post.register ? req.context.post.register : null
         switch ('/'+baseUrl[1]) {
-            case process.env.ADMIN_ROUTE:
-                UserController.redirectAdminLogin(req, res, next)
-                break
+            default:
             case process.env.USER_ROUTE:
                 if (register) {
                     UserController.redirectUserRegister(req, res, next)
@@ -215,12 +255,8 @@ const UserController = {
                     UserController.redirectUserLogin(req, res, next)
                 }
                 break
-            default:
-                if (register) {
-                    UserController.redirectUserRegister(req, res, next)
-                } else {
-                    UserController.redirectUserLogin(req, res, next)
-                }
+            case process.env.ADMIN_ROUTE:
+                UserController.redirectAdminLogin(req, res, next)
                 break
         }
     },
@@ -267,10 +303,8 @@ const UserController = {
         }
     },
     redirectUserPanel(req, res, next) {
-        const v = req.context.varsUrl
-        const url = `/user/panel${v}`
-        console.log('JODER!! ' + url);
-        res.redirect(url)
+        const url = req.context.varsUrl
+        res.redirect('/user/panel' + url)
     },
     redirectUserLogin(req, res, next) {
         const url = req.context.varsUrl

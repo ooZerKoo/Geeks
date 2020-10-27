@@ -1,9 +1,18 @@
-if cart && cart.length > 0
+if cart
   #cart
+    span.btn.btn-secondary
+      span (#{cart.length})
+      i.fas.fa-shopping-cart
     form(method='POST')
-      each v in cart
-        li
-          a.btn(href=v.link)=v.name
-          button.btn.btn-delete(type='submit', value=v._id, name='deleteCart') X
-    if totalCart
-      .price=totalCart
+      if cart.length > 0
+          each v in cart
+            li
+              a.btn(href=v.link)=v.name
+              button.btn.btn-delete(type='submit', value=v._id, name='deleteCart')
+                i.fas.fa-trash
+          if totalCart
+            .row
+              .price Total: #{totalCart} €
+      else
+        .row
+          .price No tienes productos

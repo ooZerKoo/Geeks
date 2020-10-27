@@ -24,10 +24,10 @@ app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(session({
-  secret: process.env.KEY,
-  name: 'user',
-  resave: true,
-  saveUninitialized: true
+	secret: process.env.KEY,
+	name: 'user',
+	resave: true,
+	saveUninitialized: true
 }))
 
 
@@ -37,7 +37,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(ContextController.getContext, ContextController.getPostData, ContextController.getExtraVars, CartController.updateCart)
+app.use(
+	ContextController.getContext,   // creamos el contexto con el carrito, errores, usuario...
+	ContextController.getExtraVars, // cogemos mensajes en la URL
+	CartController.updateCart       // actualizamos el carrito
+)
 
 app.use('/', indexRouter);
 app.use(process.env.USER_ROUTE, usersRouter);
@@ -47,19 +51,19 @@ app.use(process.env.ADMIN_ROUTE, adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+	next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+	// set locals, only providing error in development
+	res.locals.message = err.message;
+	res.locals.error = req.app.get('env') === 'development' ? err : {};
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('pages/error');
+	// render the error page
+	res.status(err.status || 500);
+	res.render('pages/error');
 });
 
 module.exports = app;

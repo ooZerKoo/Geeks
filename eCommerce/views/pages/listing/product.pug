@@ -1,11 +1,10 @@
-.row
+#productPage
   h1=product.name
   h2=product.description
-  .row
-    span.price=product.price+product.getSymbol
+  .prices
+    span.price=product.finalPrice+product.getSymbol
     if product.discount > 0
+      span.price-before=product.price+product.getSymbol
       span.price-discount=' -'+product.discount+(product.discountType == 'amount' ? product.getSymbol : '%')
-      span.price-final=product.finalPrice+product.getSymbol
-  .row
     form(method='POST')
       button.btn.btn-secondary(type='submit', value=product._id, name='addToCart') Comprar

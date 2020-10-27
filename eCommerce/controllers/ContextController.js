@@ -1,7 +1,6 @@
 const CategoryController = require('../controllers/CategoryController')
 const UserController = require('../controllers/UserController')
 const MessageController = require('../controllers/MessageController')
-const CartController = require('../controllers/CartController')
 const AdminController = require('./AdminController')
 
 const ContextController = {
@@ -9,7 +8,12 @@ const ContextController = {
         try {
             const path = ContextController.getPath(req)
             if (path) {
-                req.context = { ...req.query }
+                const context = req.context
+                if (context) {
+                    req.context = { context, ...req.query}
+                } else {
+                    req.context = { ...req.query }
+                }
                 const error = req.context.error
                 const success = req.context.success
                 req.context.post = {}
@@ -61,8 +65,15 @@ const ContextController = {
     },
     async getPostData(req, res, next) {
         try {
-            const { body, query } = req
-            req.context.post = { ...body, ...query }
+            if (req.context) {
+                const { body, query } = req
+                const { post } = req.context
+                if (post) {
+                    req.context.post = { ...post, ...body, ...query }
+                } else {
+                    req.context.post = { ...body, ...query }
+                }
+            }
             next()
         } catch (error) {
             console.error(error)
@@ -95,16 +106,15 @@ const ContextController = {
     },
     getExtraVars(req, res, next) {
         const context = req.context
-        console.log(context);
         let varsUrl
         if (context) {
             let vars = []
             let varsFinal = []
-            const putVar = ['login', 'error', 'success']
+            const putVar = ['login', 'error', 'success', 'register', 'admin']
             const post = req.context.post
             if (post) {
                 for (i in post) {
-                    if (putVar.includes(i) && typeof post[i] != 'undefined' && post[i].length > 0) {
+                    if (putVar.includes(i) && typeof post[i] != 'undefined' && (post[i].length > 0 || post[i] == 1)) {
                         vars[i] = `${i}=${post[i]}`
                     }
                 }
@@ -117,7 +127,6 @@ const ContextController = {
             }
         }
         req.context.varsUrl = varsUrl ? varsUrl : ''
-        console.log(req.context);
         next()
     }
 }

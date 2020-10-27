@@ -4,16 +4,47 @@ const router = express.Router()
 
 const UserController = require('../controllers/UserController')
 
-/* GET users listing. */
-router.get('/', UserController.isNotLoggedUser, UserController.renderForm)
-router.post('/', UserController.isNotLoggedUser, ContextController.getPostData, UserController.setLogin, ContextController.getExtraVars, UserController.goPanel)
+router.get('/',
+    UserController.isNotLoggedUser,     // comprobamos que no está loggeado
+    UserController.renderForm           // render del login
+)
+router.post('/',
+    UserController.isNotLoggedUser,     // comprobamos que no está loggeado
+    ContextController.getPostData,      // cogemos el context.post
+    UserController.setLogin,            // hacemos login
+    ContextController.getExtraVars,     // cogemos errores y parámetros url
+    UserController.goPanel              // redireccionamos al panel
+)
 
-router.get('/register', UserController.renderRegister, UserController.isNotLoggedUser, UserController.renderForm)
-router.post('/register', UserController.renderRegister, UserController.isNotLoggedUser, ContextController.getPostData, UserController.setRegister, ContextController.getExtraVars, UserController.goPanel)
+router.get('/register',
+    UserController.renderRegister,      // decimos que es formulario de registro
+    UserController.isNotLoggedUser,     // comprobamos que no está loggeado
+    UserController.renderForm           // render del login
+)
+router.post('/register',
+    UserController.renderRegister,      // decimos que es formulario de registro
+    UserController.isNotLoggedUser,     // comprobamos que no está loggeado
+    ContextController.getPostData,      // cogemos el context.post
+    UserController.setRegister,         // registramos el usuario
+    ContextController.getExtraVars,     // cogemos errores y parámetros url
+    UserController.goPanel              // redireccionamos al panel
+)
 
-router.get('/panel', UserController.isLoggedUser, UserController.renderPanel)
-router.post('/panel', UserController.isLoggedUser, ContextController.getPostData, UserController.postUser, ContextController.getExtraVars, UserController.goPanel)
+router.get('/panel',
+    UserController.isLoggedUser,        // comprobamos que está loggeado
+    UserController.renderPanel          // render del panel de usuario
+)
+router.post('/panel',
+    UserController.isLoggedUser,        // comprobamos que está loggeado
+    ContextController.getPostData,      // cogemos el context.post
+    UserController.postUser,            // actualizamos el usuario
+    ContextController.getExtraVars,     // cogemos errores y parámetros url
+    UserController.goPanel              // redireccionamos al panel
+)
 
-router.get('/logout', UserController.isLoggedUser, UserController.logout)
+router.get('/logout',
+    UserController.isLoggedUser,        // comprobamos que está loggeado
+    UserController.logout               // cerramos sesión
+)
 
 module.exports = router
