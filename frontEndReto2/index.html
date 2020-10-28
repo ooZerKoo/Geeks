@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Carrito</title>
+    <meta name='viewport' content='width=deice-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='./css/style.css'>
+</head>
+
+<body>
+    <div id="content">
+        <div id="mostrador">
+            <div id="product_1" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/01.jpg">
+            </div>
+
+            <div id="product_2" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/02.jpg">
+            </div>
+
+            <div id="product_3" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/03.jpg">
+            </div>
+
+            <div id="product_4" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/04.jpg">
+            </div>
+
+            <div id="product_5" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/05.jpg">
+            </div>
+
+            <div id="product_6" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/06.jpg">
+            </div>
+
+            <div id="product_7" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/07.jpg">
+            </div>
+
+            <div id="product_8" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/08.jpg">
+            </div>
+
+            <div id="product_9" class="product" draggable="true" ondragstart="drag(event)" onclick="restore(event)">
+                <img src="img/09.jpg">
+            </div>
+
+        </div>
+        <div id="carrito" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+    </div>
+
+    <script>
+        const mostrador = document.getElementById('mostrador')
+        const cart = document.getElementById('carrito')
+
+        const allowDrop = (e) => e.preventDefault()
+        const drag = (e) => e.dataTransfer.setData('text', e.target.parentElement.id)
+        const restore = (e) => {
+            e.preventDefault()
+            var id = e.target.parentElement.id
+            var product = document.getElementById(id)
+            var parentId = product.parentElement.id
+            if (parentId == 'carrito') {
+                product.remove()
+                mostrador.appendChild(product)
+            }
+        }
+
+        const drop = (e) => {
+            e.preventDefault()
+            var id = e.dataTransfer.getData('text')
+            var product = document.getElementById(id)
+            cart.appendChild(product)
+        }
+    </script>
+
+</body>
+
+</html>
