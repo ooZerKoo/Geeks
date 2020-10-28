@@ -7,7 +7,7 @@ body {
     width: 100%;
     min-height: 100vh;
     font-family: Barlow;
-    font-size: calc(1eM + 0.5vh);
+    font-size: calc(1eM + 0.5vh + 0.2vw);
     color: #1d1d1d;
     grid-row-gap: 5vh;
 }
