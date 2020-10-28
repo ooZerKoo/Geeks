@@ -149,10 +149,14 @@ const UserController = {
     },
     async renderMenu(req) {
         try {
-            const base_url = process.env.USER_ROUTE+'/'
+            const base_url = process.env.USER_ROUTE + '/'
             const userMenu = []
             if (req.session && req.session.user) {
                 userMenu.push({name: 'Tu cuenta', url: base_url})
+                if (req.session.user.role == 'admin') {
+                    userMenu.push({name: 'Admin', url: process.env.ADMIN_ROUTE + '/panel'})
+                }
+                userMenu.push({name: 'Salir', url: base_url + 'logout'})
             } else {
                 userMenu.push({name: 'Inicia Sesión', url: base_url})
             }
@@ -180,9 +184,9 @@ const UserController = {
                 next()
             } else {
                 if (logged.role == 'admin') {
+                    req.context.post.error = [1030]
                     UserController.goPanel(req, res)
                 } else {
-                    req.context.post.error = [1030]
                     next()
                 }
             }
@@ -194,13 +198,14 @@ const UserController = {
         try {
             const logged = req.session.user
             if (logged) {
-                if (logged.role != 'admin') {
+                if (logged.role == 'admin') {
+                    next()
+                } else {
                     req.context.post.error = [1030]
                     UserController.goLogin(req, res, next)
-                } else {
-                    next()
                 }
             } else {
+                req.context.post.error = [1012]
                 UserController.goLogin(req, res, next)
             }
         } catch (error) {
@@ -304,7 +309,7 @@ const UserController = {
     },
     redirectUserPanel(req, res, next) {
         const url = req.context.varsUrl
-        res.redirect('/user/panel' + url)
+        res.redirect(process.env.USER_ROUTE + '/panel' + url)
     },
     redirectUserLogin(req, res, next) {
         const url = req.context.varsUrl
@@ -312,15 +317,15 @@ const UserController = {
     },
     redirectUserRegister(req, res, next) {
         const url = req.context.varsUrl
-        res.redirect('/user/register' + url)
+        res.redirect(process.env.USER_ROUTE + '/register' + url)
     },
     redirectAdminPanel(req, res, next) {
         const url = req.context.varsUrl
-        res.redirect('/admin/panel' + url)
+        res.redirect(process.env.ADMIN_ROUTE + '/panel' + url)
     },
     redirectAdminLogin(req, res, next) {
         const url = req.context.varsUrl
-        res.redirect('/admin' + url)
+        res.redirect(process.env.ADMIN_ROUTE + url)
     },
     setPassword(password) {
         return bcrypt.hash(password, saltRounds)

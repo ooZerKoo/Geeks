@@ -48,15 +48,18 @@ const ContextController = {
     },
     async getMenus(req, path) {
         try {
+            const userMenu = await UserController.renderMenu(req)
             if (path == 'admin') {
                 const adminMenu = AdminController.renderMenu()
-                return {adminMenu: adminMenu}
+                return {
+                    adminMenu: adminMenu,
+                    userMenu: userMenu,
+                }
             } else {
                 const categoryMenu = await CategoryController.renderMenu(req)
-                const userMenu = await UserController.renderMenu(req)
                 return {
                     categoryMenu: categoryMenu,
-                    userMenu: userMenu
+                    userMenu: userMenu,
                 }
             }
         } catch (error) {
@@ -69,9 +72,9 @@ const ContextController = {
                 const { body, query } = req
                 const { post } = req.context
                 if (post) {
-                    req.context.post = { ...post, ...body, ...query }
+                    req.context.post = { ...post, ...query, ...body }
                 } else {
-                    req.context.post = { ...body, ...query }
+                    req.context.post = { ...query, ...body }
                 }
             }
             next()

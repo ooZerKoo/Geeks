@@ -1,6 +1,5 @@
 const UserController = require('../controllers/UserController')
 
-const User = require('../models/User')
 const Product = require('../models/Product')
 const Category = require('../models/Category')
 
@@ -11,14 +10,14 @@ const AdminController = {
             const error = []
             const success = []
             if (!password || !login) {
-                error.push(2)
+                error.push(1002)
             } else {
                 user = await UserController.findByCredentials(login, password)
                 if (typeof user != 'object') {
                     error.push(user)
                 } else {
                     if (user.role != 'admin')
-                    error.push(30)
+                    error.push(1030)
                 }
             }
             req.context.post.error = error
@@ -82,7 +81,6 @@ const AdminController = {
             {name: 'Pedidos', url: url_panel+'orders'},
             {name: 'Categorías', url: url_panel+'categories'},
             {name: 'Productos', url: url_panel+'products'},
-            {name: 'Salir', url: url+'logout'},
         ]
         return left_menu
     }

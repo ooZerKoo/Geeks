@@ -1,3 +1,6 @@
 if leftColumn.categoryMenu && leftColumn.categoryMenu.length > 0
 	each v in leftColumn.categoryMenu
 		a(href=v.url)=v.name
+if leftColumn.adminMenu && leftColumn.adminMenu.length > 0
+	each v in leftColumn.adminMenu
+		a(href=v.url)=v.name

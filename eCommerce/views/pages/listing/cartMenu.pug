@@ -1,13 +1,13 @@
 if cart
   #cart
     span.btn.btn-secondary
-      span (#{cart.length})
+      span (#{cartQuantity})
       i.fas.fa-shopping-cart
     form(method='POST')
       if cart.length > 0
           each v in cart
             li
-              a.btn(href=v.link)=v.name
+              a.btn(href=v.link)=v.name + ' (' + v.cartQuantity + ')'
               button.btn.btn-delete(type='submit', value=v._id, name='deleteCart')
                 i.fas.fa-trash
           if totalCart

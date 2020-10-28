@@ -23,6 +23,7 @@ const MessageController = {
             {id: 1009, value: 'La contraseña tiene que ser de ' + process.env.PASSWD_LEN + ' o más caracteres'},
             {id: 1010, value: 'Usuario no encontrado'},
             {id: 1011, value: 'Contraseña Incorrecta'},
+            {id: 1012, value: 'Inicia Sesión para ver el contenido'},
             {id: 1030, value: 'No tienes permisos para entrar'},
 
             // productos

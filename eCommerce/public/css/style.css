@@ -15,8 +15,16 @@ body {
   padding-bottom: 50px;
   display: grid;
   grid-template-columns: 20% 80%;
+  grid-template-rows: 65px 1fr;
 }
 
+#nav {
+  grid-column: 1 / span 2;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  background: #1d1d1d;
+  padding: 0.75rem;
+}
 
 #left_column {
     background: #f9f9f9;
@@ -29,8 +37,8 @@ body {
 
 h1 {
     text-align: center;
-    background: #1d1d1d;
-    color: white;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
     padding: 25px 0;
     margin: 0 0 25px;
 }
@@ -257,8 +265,8 @@ form.editForm {
 
 #productPage .prices {
   font-size: 1.3eM;
-  background-color: #eee;
-  border: 3px solid;
+  background-color: #f9f9f9;
+  border: 6px solid;
 }
 .prices {
   padding: 25px;
@@ -326,13 +334,14 @@ form.editForm {
   grid-column: 2 / 2;
   grid-row: 1;
   align-items: end;
+  justify-content: center;
 }
 .prices .price-discount {
   grid-column: 2 / 2;
   grid-row: 2;
   align-content: start;
   align-items: start;
-  /*! align-self: start; */
+  justify-content: center;
 }
 
 #cart:hover form {
@@ -363,6 +372,7 @@ form.editForm {
   grid-template-rows: repeat(auto-fill, minmax(25px, 1fr));
   grid-gap: 15px;
   position: relative;
+  grid-column: 9;
 }
 
 #cart form .price {
@@ -371,4 +381,12 @@ form.editForm {
 
 #cart .btn span {
   margin-right: 15px;
+}
+
+#userMenu {
+  grid-column: 7 / span 2;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 0.75rem;
 }

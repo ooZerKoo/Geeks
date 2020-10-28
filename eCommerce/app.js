@@ -40,7 +40,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(
 	ContextController.getContext,   // creamos el contexto con el carrito, errores, usuario...
 	ContextController.getExtraVars, // cogemos mensajes en la URL
-	CartController.updateCart       // actualizamos el carrito
+	CartController.updateCart,      // actualizamos el carrito
+	// ContextController.logContext,	// hacemos log del contexto
 )
 
 app.use('/', indexRouter);

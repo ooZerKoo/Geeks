@@ -6,20 +6,22 @@ const UserController = require('../controllers/UserController')
 
 router.get('/',
     UserController.isNotLoggedUser,     // comprobamos que no está loggeado
-    UserController.renderForm           // render del login
+    ContextController.getExtraVars,     // cogemos errores y parámetros url
+    UserController.renderForm,          // render del login
 )
 router.post('/',
     UserController.isNotLoggedUser,     // comprobamos que no está loggeado
     ContextController.getPostData,      // cogemos el context.post
     UserController.setLogin,            // hacemos login
     ContextController.getExtraVars,     // cogemos errores y parámetros url
-    UserController.goPanel              // redireccionamos al panel
+    UserController.goPanel,             // redireccionamos al panel
 )
 
 router.get('/register',
     UserController.renderRegister,      // decimos que es formulario de registro
     UserController.isNotLoggedUser,     // comprobamos que no está loggeado
-    UserController.renderForm           // render del login
+    ContextController.getExtraVars,     // cogemos errores y parámetros url
+    UserController.renderForm,          // render del login
 )
 router.post('/register',
     UserController.renderRegister,      // decimos que es formulario de registro
@@ -32,7 +34,8 @@ router.post('/register',
 
 router.get('/panel',
     UserController.isLoggedUser,        // comprobamos que está loggeado
-    UserController.renderPanel          // render del panel de usuario
+    ContextController.getExtraVars,     // cogemos errores y parámetros url
+    UserController.renderPanel,         // render del panel de usuario
 )
 router.post('/panel',
     UserController.isLoggedUser,        // comprobamos que está loggeado

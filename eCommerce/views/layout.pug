@@ -6,13 +6,14 @@ html
 		link(rel='stylesheet', href='/fontawesome/css/all.min.css')
 		meta(charset="utf-8")
 		meta(name="viewport", content="width=device-width, initial-scale=1, shrink-to-fit=no")
-	body
-		
-		#left_column
+	body(id=bodyId ? bodyId : '')
+		#nav
 			if cart
 				include ./pages/listing/cartMenu
 			if leftColumn
 				include ./pages/listing/userMenu
+		#left_column
+			if leftColumn
 				include ./pages/listing/categoriesMenu
 
 		#container

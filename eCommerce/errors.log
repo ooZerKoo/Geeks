@@ -1,0 +1,7 @@
+routes / admin.js
+
+El contexto en general
+    -> ¿Cómo hacerlo bien?
+    -> ¿Cómo hacer una petición siempre después de cada respuesta?
+    -> ¿Si hago un redirect cómo paso variables?
+        -> Ahora hago un ContextController.getExtraVars() y se lo paso como req.query
